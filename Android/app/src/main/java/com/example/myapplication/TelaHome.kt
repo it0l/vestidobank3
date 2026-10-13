@@ -1,15 +1,39 @@
-package com.example.TelaHome
+package com.example.myapplication
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Diamond
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,93 +41,82 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.myapplication.navigation.Rotas
 
 val PinkPrimary = Color(0xFFE6007E)
 val PinkLight = Color(0xFFF7DCE1)
 val BackgroundGray = Color(0xFFF2F2F2)
 
 @Composable
-fun TelaHome() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BackgroundGray)
-    ) {
-        CabecalhoRosa()
-        Spacer(modifier = Modifier.height(50.dp))
-        SaldoConta()
-        Spacer(modifier = Modifier.height(50.dp))
-        AcoesRapidas()
-        Spacer(modifier = Modifier.height(50.dp))
-        BannerInvestimentos()
-        Spacer(modifier = Modifier.height(20.dp))
-        CartaoMeusCartoes()
-        Spacer(modifier = Modifier.height(20.dp))
-        CartaoEmprestimo()
+fun TelaHome(navController: NavHostController) {
+    Scaffold(
+        containerColor = BackgroundGray,
+        topBar = { CabecalhoRosa() }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            SaldoConta()
+            Spacer(modifier = Modifier.height(34.dp))
+
+            AcoesRapidas(
+                onPix = { navController.navigate(Rotas.PIX) },
+                onTrazerDinheiro = { navController.navigate(Rotas.PIX) },
+                onPagar = { navController.navigate(Rotas.FATURA) },
+                onRecarga = { navController.navigate(Rotas.PIX) }
+            )
+
+            Spacer(modifier = Modifier.height(34.dp))
+            BannerInvestimentos()
+            Spacer(modifier = Modifier.height(20.dp))
+
+            CartaoMeusCartoes(
+                onClick = { navController.navigate(Rotas.CARTOES) }
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+            CartaoEmprestimo(
+                onClick = { navController.navigate(Rotas.CARTOES) }
+            )
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CabecalhoRosa() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(PinkPrimary)
-            .padding(horizontal = 16.dp, vertical = 30.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .background(Color.White, RoundedCornerShape(50)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Perfil",
-                    tint = PinkPrimary
-                )
-            }
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Visibility, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(Icons.Default.Build, contentDescription = null, tint = Color.White)
-                Spacer(modifier = Modifier.width(16.dp))
-                Icon(Icons.Default.Menu, contentDescription = null, tint = Color.White)
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(22.dp),
-            color = Color.White
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(30.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Seu Score aumentou! Confira.",
-                    color = PinkPrimary,
-                    fontWeight = FontWeight.Medium
-                )
-                Icon(Icons.Default.MoreVert, contentDescription = null, tint = Color.DarkGray)
-            }
-        }
-    }
+    TopAppBar(
+        title = {
+            Text(
+                text = "Lucas",
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        navigationIcon = {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Perfil",
+                tint = Color.White,
+                modifier = Modifier.padding(start = 12.dp)
+            )
+        },
+        actions = {
+            Icon(Icons.Default.Visibility, "Visibilidade", tint = Color.White)
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(Icons.Default.Build, "Configurações", tint = Color.White)
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(Icons.Default.Menu, "Menu", tint = Color.White)
+            Spacer(modifier = Modifier.width(12.dp))
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = PinkPrimary)
+    )
 }
 
 @Composable
@@ -125,46 +138,46 @@ fun SaldoConta() {
 }
 
 @Composable
-fun AcoesRapidas() {
+fun AcoesRapidas(
+    onPix: () -> Unit,
+    onTrazerDinheiro: () -> Unit,
+    onPagar: () -> Unit,
+    onRecarga: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        AcaoCircular(icon = Icons.Default.Diamond, texto = "PIX")
-        AcaoCircular(icon = Icons.Default.ArrowDownward, texto = "Trazer dinheiro")
-        AcaoCircular(icon = Icons.Default.ShoppingBag, texto = "Pagar")
-        AcaoCircular(icon = Icons.Default.Call, texto = "Recarga")
+        AcaoCircular(Icons.Default.Diamond, "PIX", onPix)
+        AcaoCircular(Icons.Default.ArrowDownward, "Trazer dinheiro", onTrazerDinheiro)
+        AcaoCircular(Icons.Default.ShoppingBag, "Pagar", onPagar)
+        AcaoCircular(Icons.Default.Call, "Recarga", onRecarga)
     }
 }
 
 @Composable
 fun AcaoCircular(
     icon: ImageVector,
-    texto: String
+    texto: String,
+    onClick: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.width(72.dp)
     ) {
         Button(
-            onClick = {},
+            onClick = onClick,
             modifier = Modifier.size(56.dp),
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.buttonColors(containerColor = PinkPrimary),
             contentPadding = PaddingValues(0.dp),
             elevation = null
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = texto,
-                tint = Color.White
-            )
+            Icon(icon, texto, tint = Color.White)
         }
-
         Spacer(modifier = Modifier.height(6.dp))
-
         Text(
             text = texto,
             fontSize = 11.sp,
@@ -186,44 +199,40 @@ fun BannerInvestimentos() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 35.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+                .padding(horizontal = 16.dp, vertical = 28.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.TrendingUp,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(32.dp)
+            Icon(
+                imageVector = Icons.Default.TrendingUp,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
+            )
+            Spacer(modifier = Modifier.width(22.dp))
+            Column {
+                Text(
+                    text = "Investimentos",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 25.sp
                 )
-
-                Spacer(modifier = Modifier.width(22.dp))
-
-                Column {
-                    Text(
-                        text = "Investimentos",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp
-                    )
-                    Text(
-                        text = "Confira as melhores ações do momento!",
-                        color = Color.White,
-                        fontSize = 18.sp
-                    )
-                }
+                Text(
+                    text = "Confira as melhores ações do momento!",
+                    color = Color.White,
+                    fontSize = 16.sp
+                )
             }
         }
     }
 }
 
 @Composable
-fun CartaoMeusCartoes() {
+fun CartaoMeusCartoes(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         color = PinkLight
     ) {
@@ -241,11 +250,12 @@ fun CartaoMeusCartoes() {
 }
 
 @Composable
-fun CartaoEmprestimo() {
+fun CartaoEmprestimo(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
         color = PinkLight
     ) {
@@ -267,10 +277,4 @@ fun CartaoEmprestimo() {
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.DarkGray)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun TelaHomePreview() {
-    TelaHome()
 }

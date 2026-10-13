@@ -49,7 +49,9 @@ private val TextColor = Color(0xFF050505)
 
 @Composable
 fun TelaFatura(
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onAcessarFatura: () -> Unit = {},
+    onMeusLimites: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -59,6 +61,10 @@ fun TelaFatura(
 
     var valorPagamento by remember {
         mutableStateOf("")
+    }
+
+    var mostrarScore by remember {
+        mutableStateOf(false)
     }
 
     Scaffold(
@@ -149,9 +155,10 @@ fun TelaFatura(
             Spacer(modifier = Modifier.height(10.dp))
 
             QuickActions(
-                onPagarFatura = {
-                    mostrarPagamento = true
-                }
+                onPagarFatura = { mostrarPagamento = true },
+                onAcessarFatura = onAcessarFatura,
+                onVestidoScore = { mostrarScore = true },
+                onMeusLimites = onMeusLimites
             )
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -209,6 +216,20 @@ fun TelaFatura(
             }
         )
     }
+
+    if (mostrarScore) {
+        AlertDialog(
+            onDismissRequest = { mostrarScore = false },
+            title = { Text("VestidoScore") },
+            text = { Text("Seu VestidoScore atual é 782. Continue usando o app para acompanhar sua evolução.") },
+            confirmButton = {
+                Button(onClick = { mostrarScore = false }) {
+                    Text("OK")
+                }
+            }
+        )
+    }
+
 }
 
 @Composable
@@ -236,7 +257,10 @@ private fun LimitBar(
 
 @Composable
 private fun QuickActions(
-    onPagarFatura: () -> Unit
+    onPagarFatura: () -> Unit,
+    onAcessarFatura: () -> Unit,
+    onVestidoScore: () -> Unit,
+    onMeusLimites: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -253,17 +277,17 @@ private fun QuickActions(
 
         QuickAction(
             text = "Acessar\nfatura",
-            onClick = {}
+            onClick = onAcessarFatura
         )
 
         QuickAction(
             text = "VestidoScore",
-            onClick = {}
+            onClick = onVestidoScore
         )
 
         QuickAction(
             text = "Meus limites",
-            onClick = {}
+            onClick = onMeusLimites
         )
     }
 }
