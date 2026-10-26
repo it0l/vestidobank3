@@ -30,39 +30,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 private val VestidoPink = Color(0xFFE6007E)
-private val VestidoPinkLight = Color(0xFFF7DCEB)
 private val Fundo = Color(0xFFF2F2F2)
 private val TextoEscuro = Color(0xFF202020)
 
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
-fun TelaPix(
-    onBack: () -> Unit
-) {
-
-    var chave by remember {
-        mutableStateOf("")
-    }
-
-    var valor by remember {
-        mutableStateOf("")
-    }
-
-    var mensagem by remember {
-        mutableStateOf("")
-    }
-
-    var sucesso by remember {
-        mutableStateOf(false)
-    }
+fun TelaPix(onBack: () -> Unit) {
+    var chave by remember { mutableStateOf("") }
+    var valor by remember { mutableStateOf("") }
+    var mensagem by remember { mutableStateOf("") }
+    var sucesso by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Fundo,
-
         topBar = {
-
             TopAppBar(
-
                 title = {
                     Text(
                         text = "Pix",
@@ -70,200 +52,95 @@ fun TelaPix(
                         fontWeight = FontWeight.Bold
                     )
                 },
-
                 navigationIcon = {
-
-                    IconButton(
-                        onClick = onBack
-                    ) {
-
+                    IconButton(onClick = onBack) {
                         Icon(
-                            imageVector =
-                                Icons.AutoMirrored.Filled.ArrowBack,
-
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar",
-
                             tint = Color.White
                         )
                     }
                 },
-
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = VestidoPink
-                    )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = VestidoPink)
             )
         }
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(20.dp)
         ) {
-
             Text(
                 text = "Enviar Pix",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextoEscuro
             )
-
-            Spacer(
-                modifier = Modifier.height(6.dp)
-            )
-
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = "Informe a chave e o valor da transferência.",
                 fontSize = 14.sp,
                 color = Color.Gray
             )
-
-            Spacer(
-                modifier = Modifier.height(24.dp)
-            )
+            Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
                 value = chave,
-
-                onValueChange = {
-                    chave = it
-                },
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                label = {
-                    Text("Chave Pix")
-                },
-
+                onValueChange = { chave = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Chave Pix") },
                 singleLine = true,
-
-                colors =
-                    OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor =
-                            VestidoPink,
-
-                        focusedLabelColor =
-                            VestidoPink,
-
-                        cursorColor =
-                            VestidoPink
-                    )
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VestidoPink,
+                    focusedLabelColor = VestidoPink,
+                    cursorColor = VestidoPink
+                )
             )
-
-            Spacer(
-                modifier = Modifier.height(12.dp)
-            )
-
+            Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = valor,
-
-                onValueChange = {
-                    valor = it
-                },
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                label = {
-                    Text("Valor")
-                },
-
+                onValueChange = { valor = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Valor") },
                 singleLine = true,
-
-                prefix = {
-                    Text("R$ ")
-                },
-
-                colors =
-                    OutlinedTextFieldDefaults.colors(
-
-                        focusedBorderColor =
-                            VestidoPink,
-
-                        focusedLabelColor =
-                            VestidoPink,
-
-                        cursorColor =
-                            VestidoPink
-                    )
+                prefix = { Text("R$ ") },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = VestidoPink,
+                    focusedLabelColor = VestidoPink,
+                    cursorColor = VestidoPink
+                )
             )
-
-            Spacer(
-                modifier = Modifier.height(20.dp)
-            )
+            Spacer(modifier = Modifier.height(20.dp))
 
             Button(
                 onClick = {
-
-                    val valorNumerico =
-                        valor
-                            .replace(",", ".")
-                            .toDoubleOrNull()
-
-                    if (
-                        chave.isNotBlank() &&
-                        valorNumerico != null &&
-                        valorNumerico > 0
-                    ) {
-
-                        mensagem =
-                            "Pix de R$ %.2f preparado para %s"
-                                .format(
-                                    valorNumerico,
-                                    chave
-                                )
-
+                    val valorNumerico = valor.replace(",", ".").toDoubleOrNull()
+                    if (chave.isNotBlank() && valorNumerico != null && valorNumerico > 0) {
+                        mensagem = "Pix de R$ %.2f preparado para %s".format(valorNumerico, chave)
                         sucesso = true
-
                         chave = ""
                         valor = ""
-
                     } else {
-
-                        mensagem =
-                            "Informe uma chave e um valor válido."
-
+                        mensagem = "Informe uma chave e um valor válido."
                         sucesso = false
                     }
                 },
-
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = VestidoPink,
-                        contentColor = Color.White
-                    )
-            ) {
-
-                Text(
-                    text = "Continuar",
-                    fontWeight = FontWeight.Bold
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = VestidoPink,
+                    contentColor = Color.White
                 )
+            ) {
+                Text("Continuar", fontWeight = FontWeight.Bold)
             }
 
             if (mensagem.isNotBlank()) {
-
-                Spacer(
-                    modifier = Modifier.height(20.dp)
-                )
-
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = mensagem,
-
-                    color =
-                        if (sucesso)
-                            VestidoPink
-                        else
-                            Color(0xFFB00020),
-
-                    fontWeight =
-                        FontWeight.Medium
+                    color = if (sucesso) VestidoPink else Color(0xFFB00020),
+                    fontWeight = FontWeight.Medium
                 )
             }
         }

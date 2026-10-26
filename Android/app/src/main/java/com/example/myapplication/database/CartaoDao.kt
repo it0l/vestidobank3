@@ -1,21 +1,20 @@
 package com.example.myapplication.database
 
-import androidx.room3.Dao
-import androidx.room3.Delete
-import androidx.room3.Insert
-import androidx.room3.Query
-import androidx.room3.Update
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 import com.example.myapplication.model.Cartao
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CartaoDao {
 
     @Query("SELECT * FROM cartoes ORDER BY id DESC")
-    fun listarTodos(): Flow<List<Cartao>>
+    suspend fun buscarTodos(): List<Cartao>
 
     @Query("SELECT * FROM cartoes WHERE id = :id LIMIT 1")
-    fun buscarPorId(id: Int): Flow<Cartao?>
+    suspend fun buscarPorId(id: Int): Cartao?
 
     @Insert
     suspend fun inserir(cartao: Cartao)
@@ -24,5 +23,5 @@ interface CartaoDao {
     suspend fun atualizar(cartao: Cartao)
 
     @Delete
-    suspend fun remover(cartao: Cartao)
+    suspend fun deletar(cartao: Cartao)
 }

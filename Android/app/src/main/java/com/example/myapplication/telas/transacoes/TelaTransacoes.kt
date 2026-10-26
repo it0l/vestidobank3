@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.model.Transacao
 
 private val VestidoPink = Color(0xFFE6007E)
-private val VestidoPinkLight = Color(0xFFFFE8F3)
 private val Fundo = Color(0xFFF2F2F2)
 private val TextoEscuro = Color(0xFF202020)
 
@@ -52,30 +51,14 @@ fun TelaTransacoes(
     onRemover: (Transacao) -> Unit,
     onAbrirDetalhes: (Transacao) -> Unit
 ) {
-
-    var descricao by remember {
-        mutableStateOf("")
-    }
-
-    var valor by remember {
-        mutableStateOf("")
-    }
-
-    var categoria by remember {
-        mutableStateOf("")
-    }
-
-    var data by remember {
-        mutableStateOf("")
-    }
-
-    var erro by remember {
-        mutableStateOf("")
-    }
+    var descricao by remember { mutableStateOf("") }
+    var valor by remember { mutableStateOf("") }
+    var categoria by remember { mutableStateOf("") }
+    var data by remember { mutableStateOf("") }
+    var erro by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = Fundo,
-
         topBar = {
             TopAppBar(
                 title = {
@@ -85,172 +68,79 @@ fun TelaTransacoes(
                         fontWeight = FontWeight.Bold
                     )
                 },
-
-                colors =
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = VestidoPink
-                    )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = VestidoPink)
             )
         }
     ) { paddingValues ->
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
-
-            verticalArrangement =
-                Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
             item {
-
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
-
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Adicionar movimentação",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextoEscuro
                 )
-
-                Spacer(
-                    modifier = Modifier.height(6.dp)
-                )
-
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     text = "Cadastre uma nova movimentação na conta.",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
-
-                Spacer(
-                    modifier = Modifier.height(14.dp)
-                )
+                Spacer(modifier = Modifier.height(14.dp))
 
                 OutlinedTextField(
                     value = descricao,
-
-                    onValueChange = {
-                        descricao = it
-                    },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-                        Text("Descrição")
-                    },
-
+                    onValueChange = { descricao = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Descrição") },
                     singleLine = true,
-
-                    colors =
-                        coresCampo()
+                    colors = coresCampo()
                 )
-
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = valor,
-
-                    onValueChange = {
-                        valor = it
-                    },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-                        Text("Valor")
-                    },
-
-                    prefix = {
-                        Text("R$ ")
-                    },
-
+                    onValueChange = { valor = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Valor") },
+                    prefix = { Text("R$ ") },
                     singleLine = true,
-
-                    colors =
-                        coresCampo()
+                    colors = coresCampo()
                 )
-
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = categoria,
-
-                    onValueChange = {
-                        categoria = it
-                    },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-                        Text("Categoria")
-                    },
-
+                    onValueChange = { categoria = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Categoria") },
                     singleLine = true,
-
-                    colors =
-                        coresCampo()
+                    colors = coresCampo()
                 )
-
-                Spacer(
-                    modifier = Modifier.height(8.dp)
-                )
-
+                Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = data,
-
-                    onValueChange = {
-                        data = it
-                    },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    label = {
-                        Text("Data (dd/mm/aaaa)")
-                    },
-
+                    onValueChange = { data = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Data (dd/mm/aaaa)") },
                     singleLine = true,
-
-                    colors =
-                        coresCampo()
+                    colors = coresCampo()
                 )
 
                 if (erro.isNotBlank()) {
-
-                    Spacer(
-                        modifier = Modifier.height(6.dp)
-                    )
-
-                    Text(
-                        text = erro,
-                        color = Color(0xFFB00020)
-                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(text = erro, color = Color(0xFFB00020))
                 }
 
-                Spacer(
-                    modifier = Modifier.height(12.dp)
-                )
-
+                Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = {
-
-                        val valorNumerico =
-                            valor
-                                .replace(",", ".")
-                                .toDoubleOrNull()
-
+                        val valorNumerico = valor.replace(",", ".").toDoubleOrNull()
                         if (
                             descricao.isBlank() ||
                             categoria.isBlank() ||
@@ -258,19 +148,9 @@ fun TelaTransacoes(
                             valorNumerico == null ||
                             valorNumerico <= 0
                         ) {
-
-                            erro =
-                                "Preencha todos os campos corretamente."
-
+                            erro = "Preencha todos os campos corretamente."
                         } else {
-
-                            onAdicionar(
-                                descricao,
-                                valorNumerico,
-                                categoria,
-                                data
-                            )
-
+                            onAdicionar(descricao, valorNumerico, categoria, data)
                             descricao = ""
                             valor = ""
                             categoria = ""
@@ -278,34 +158,22 @@ fun TelaTransacoes(
                             erro = ""
                         }
                     },
-
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = VestidoPink,
-                            contentColor = Color.White
-                        )
-                ) {
-
-                    Text(
-                        text = "Adicionar movimentação",
-                        fontWeight = FontWeight.Bold
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = VestidoPink,
+                        contentColor = Color.White
                     )
+                ) {
+                    Text("Adicionar movimentação", fontWeight = FontWeight.Bold)
                 }
 
-                Spacer(
-                    modifier = Modifier.height(22.dp)
-                )
-
+                Spacer(modifier = Modifier.height(22.dp))
                 Text(
                     text = "Histórico",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextoEscuro
                 )
-
                 Text(
                     text = "${transacoes.size} movimentação(ões)",
                     fontSize = 13.sp,
@@ -313,154 +181,65 @@ fun TelaTransacoes(
                 )
             }
 
-            items(
-                items = transacoes,
-                key = {
-                    it.id
-                }
-            ) { transacao ->
-
+            items(items = transacoes, key = { it.id }) { transacao ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable {
-                            onAbrirDetalhes(
-                                transacao
-                            )
-                        },
-
-                    shape =
-                        RoundedCornerShape(16.dp),
-
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor = Color.White
-                        ),
-
-                    elevation =
-                        CardDefaults.cardElevation(
-                            defaultElevation = 2.dp
-                        )
+                        .clickable { onAbrirDetalhes(transacao) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-
-                        horizontalArrangement =
-                            Arrangement.SpaceBetween,
-
-                        verticalAlignment =
-                            Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-
-                        Column(
-                            modifier =
-                                Modifier.weight(1f)
-                        ) {
-
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text =
-                                    transacao.descricao,
-
-                                fontWeight =
-                                    FontWeight.Bold,
-
+                                text = transacao.descricao,
+                                fontWeight = FontWeight.Bold,
                                 fontSize = 17.sp,
-
                                 color = TextoEscuro
                             )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.height(3.dp)
-                            )
-
+                            Spacer(modifier = Modifier.height(3.dp))
                             Text(
-                                text =
-                                    "${transacao.categoria} • ${transacao.data}",
-
-                                color =
-                                    Color.Gray,
-
-                                fontSize =
-                                    13.sp
+                                text = "${transacao.categoria} • ${transacao.data}",
+                                color = Color.Gray,
+                                fontSize = 13.sp
                             )
-
-                            Spacer(
-                                modifier =
-                                    Modifier.height(7.dp)
-                            )
-
+                            Spacer(modifier = Modifier.height(7.dp))
                             Text(
-                                text =
-                                    "R$ %.2f"
-                                        .format(
-                                            transacao.valor
-                                        ),
-
-                                color =
-                                    VestidoPink,
-
-                                fontWeight =
-                                    FontWeight.Bold,
-
-                                fontSize =
-                                    17.sp
+                                text = "R$ %.2f".format(transacao.valor),
+                                color = VestidoPink,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 17.sp
                             )
                         }
 
-                        IconButton(
-                            onClick = {
-                                onRemover(
-                                    transacao
-                                )
-                            }
-                        ) {
-
+                        IconButton(onClick = { onRemover(transacao) }) {
                             Icon(
-                                imageVector =
-                                    Icons.Default.Delete,
-
-                                contentDescription =
-                                    "Remover movimentação",
-
-                                tint =
-                                    VestidoPink
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Remover movimentação",
+                                tint = VestidoPink
                             )
                         }
                     }
                 }
             }
 
-            item {
-
-                Spacer(
-                    modifier =
-                        Modifier.height(16.dp)
-                )
-            }
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
 @Composable
-private fun coresCampo() =
-    OutlinedTextFieldDefaults.colors(
-
-        focusedBorderColor =
-            VestidoPink,
-
-        focusedLabelColor =
-            VestidoPink,
-
-        cursorColor =
-            VestidoPink,
-
-        focusedContainerColor =
-            Color.White,
-
-        unfocusedContainerColor =
-            Color.White
-    )
+private fun coresCampo() = OutlinedTextFieldDefaults.colors(
+    focusedBorderColor = VestidoPink,
+    focusedLabelColor = VestidoPink,
+    cursorColor = VestidoPink,
+    focusedContainerColor = Color.White,
+    unfocusedContainerColor = Color.White
+)
