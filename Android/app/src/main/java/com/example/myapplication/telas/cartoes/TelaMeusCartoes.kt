@@ -45,7 +45,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import com.example.myapplication.R
 import com.example.myapplication.model.Cartao
 
@@ -56,12 +55,12 @@ private val TextColor = Color(0xFF050505)
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun TelaMeusCartoes(
-    navController: NavHostController,
     cartoes: List<Cartao>,
     onAdicionar: (String, String, String, Double, Double) -> Unit,
     onRemover: (Cartao) -> Unit,
     onAlternarBloqueio: (Cartao) -> Unit,
-    onAbrirDetalhes: (Cartao) -> Unit
+    onAbrirDetalhes: (Cartao) -> Unit,
+    onBack: () -> Unit = {}
 ) {
     var mostrarFormulario by remember { mutableStateOf(false) }
     var modoBloqueio by remember { mutableStateOf(false) }
@@ -80,7 +79,7 @@ fun TelaMeusCartoes(
             TopAppBar(
                 title = { Text("Meus cartões") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Voltar"
@@ -127,6 +126,7 @@ fun TelaMeusCartoes(
                             mensagemAcao = ""
                         }
                     )
+
                     ActionItem(
                         modifier = Modifier.weight(1f),
                         iconRes = R.drawable.ic_vestido_cadeado,
@@ -141,15 +141,18 @@ fun TelaMeusCartoes(
                             }
                         }
                     )
+
                     ActionItem(
                         modifier = Modifier.weight(1f),
                         iconRes = R.drawable.ic_vestido_carteira,
                         title = "Adicionar à\ncarteira",
                         iconSize = 30.dp,
                         onClick = {
-                            mensagemAcao = "${cartoes.size} cartão(ões) preparado(s) para a carteira."
+                            mensagemAcao =
+                                "${cartoes.size} cartão(ões) preparado(s) para a carteira."
                         }
                     )
+
                     ActionItem(
                         modifier = Modifier.weight(1f),
                         iconRes = R.drawable.ic_vestido_ajustes,
@@ -157,7 +160,11 @@ fun TelaMeusCartoes(
                         iconSize = 30.dp,
                         onClick = {
                             cartoes.firstOrNull()?.let(onAbrirDetalhes)
-                            if (cartoes.isEmpty()) mensagemAcao = "Adicione um cartão primeiro."
+
+                            if (cartoes.isEmpty()) {
+                                mensagemAcao =
+                                    "Adicione um cartão primeiro."
+                            }
                         }
                     )
                 }
@@ -172,11 +179,13 @@ fun TelaMeusCartoes(
 
                 if (mostrarFormulario) {
                     Spacer(modifier = Modifier.height(18.dp))
+
                     Text(
                         text = "Novo cartão",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
+
                     OutlinedTextField(
                         value = nome,
                         onValueChange = { nome = it },
@@ -184,13 +193,17 @@ fun TelaMeusCartoes(
                         label = { Text("Nome do cartão") },
                         singleLine = true
                     )
+
                     OutlinedTextField(
                         value = finalNumero,
-                        onValueChange = { finalNumero = it.take(4) },
+                        onValueChange = {
+                            finalNumero = it.take(4)
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("4 últimos números") },
                         singleLine = true
                     )
+
                     OutlinedTextField(
                         value = tipo,
                         onValueChange = { tipo = it },
@@ -198,6 +211,7 @@ fun TelaMeusCartoes(
                         label = { Text("Tipo/uso") },
                         singleLine = true
                     )
+
                     OutlinedTextField(
                         value = limite,
                         onValueChange = { limite = it },
@@ -205,6 +219,7 @@ fun TelaMeusCartoes(
                         label = { Text("Limite") },
                         singleLine = true
                     )
+
                     OutlinedTextField(
                         value = usado,
                         onValueChange = { usado = it },
@@ -223,8 +238,12 @@ fun TelaMeusCartoes(
 
                     Button(
                         onClick = {
-                            val limiteNumerico = limite.replace(",", ".").toDoubleOrNull()
-                            val usadoNumerico = usado.replace(",", ".").toDoubleOrNull()
+                            val limiteNumerico =
+                                limite.replace(",", ".").toDoubleOrNull()
+
+                            val usadoNumerico =
+                                usado.replace(",", ".").toDoubleOrNull()
+
                             if (
                                 nome.isBlank() ||
                                 finalNumero.length != 4 ||
@@ -234,7 +253,14 @@ fun TelaMeusCartoes(
                             ) {
                                 erro = "Preencha os campos corretamente."
                             } else {
-                                onAdicionar(nome, finalNumero, tipo, limiteNumerico, usadoNumerico)
+                                onAdicionar(
+                                    nome,
+                                    finalNumero,
+                                    tipo,
+                                    limiteNumerico,
+                                    usadoNumerico
+                                )
+
                                 nome = ""
                                 finalNumero = ""
                                 tipo = ""
@@ -242,7 +268,8 @@ fun TelaMeusCartoes(
                                 usado = ""
                                 erro = ""
                                 mostrarFormulario = false
-                                mensagemAcao = "Cartão adicionado com sucesso."
+                                mensagemAcao =
+                                    "Cartão adicionado com sucesso."
                             }
                         },
                         modifier = Modifier
@@ -254,6 +281,7 @@ fun TelaMeusCartoes(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
                     text = "Cartões cadastrados (${cartoes.size})",
                     color = TextColor,
@@ -269,9 +297,13 @@ fun TelaMeusCartoes(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onAbrirDetalhes(cartao) },
+                        .clickable {
+                            onAbrirDetalhes(cartao)
+                        },
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(containerColor = VestidoPink)
+                    colors = CardDefaults.cardColors(
+                        containerColor = VestidoPink
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -280,7 +312,9 @@ fun TelaMeusCartoes(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_vestido_cartao),
+                            painter = painterResource(
+                                id = R.drawable.ic_vestido_cartao
+                            ),
                             contentDescription = "Cartão",
                             tint = Color.White,
                             modifier = Modifier.size(42.dp)
@@ -288,19 +322,28 @@ fun TelaMeusCartoes(
 
                         Spacer(modifier = Modifier.width(14.dp))
 
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
                             Text(
                                 text = cartao.nome,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 17.sp
                             )
+
                             Text(
-                                text = "•••• ${cartao.finalNumero} • ${cartao.tipo}",
+                                text =
+                                    "•••• ${cartao.finalNumero} • ${cartao.tipo}",
                                 color = Color.White.copy(alpha = 0.9f)
                             )
+
                             Text(
-                                text = if (cartao.bloqueado) "BLOQUEADO" else "Ativo",
+                                text = if (cartao.bloqueado) {
+                                    "BLOQUEADO"
+                                } else {
+                                    "Ativo"
+                                },
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
@@ -309,11 +352,17 @@ fun TelaMeusCartoes(
                         if (modoBloqueio) {
                             Checkbox(
                                 checked = cartao.bloqueado,
-                                onCheckedChange = { onAlternarBloqueio(cartao) }
+                                onCheckedChange = {
+                                    onAlternarBloqueio(cartao)
+                                }
                             )
                         }
 
-                        IconButton(onClick = { onRemover(cartao) }) {
+                        IconButton(
+                            onClick = {
+                                onRemover(cartao)
+                            }
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Remover cartão",
@@ -324,7 +373,9 @@ fun TelaMeusCartoes(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(14.dp)) }
+            item {
+                Spacer(modifier = Modifier.height(14.dp))
+            }
         }
     }
 }
@@ -333,12 +384,17 @@ fun TelaMeusCartoes(
 private fun PinkChip(text: String) {
     Card(
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = VestidoPink)
+        colors = CardDefaults.cardColors(
+            containerColor = VestidoPink
+        )
     ) {
         Text(
             text = text,
             color = Color.White,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 8.dp)
+            modifier = Modifier.padding(
+                horizontal = 18.dp,
+                vertical = 8.dp
+            )
         )
     }
 }
@@ -359,7 +415,9 @@ private fun ActionItem(
             onClick = onClick,
             modifier = Modifier.size(56.dp),
             shape = CircleShape,
-            colors = ButtonDefaults.buttonColors(containerColor = VestidoPink),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = VestidoPink
+            ),
             contentPadding = PaddingValues(0.dp),
             elevation = null
         ) {
@@ -372,6 +430,7 @@ private fun ActionItem(
         }
 
         Spacer(modifier = Modifier.height(6.dp))
+
         Text(
             text = title,
             textAlign = TextAlign.Center,

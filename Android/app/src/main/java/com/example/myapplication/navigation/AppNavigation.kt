@@ -21,7 +21,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -95,12 +94,16 @@ fun AppNavigation() {
 
             composable(Rotas.FATURA) {
                 TelaFatura(
-                    onBack = { navController.popBackStack() },
+                    onBack = { voltarParaAnteriorOuHome(navController) },
                     onAcessarFatura = {
-                        navController.navigate(Rotas.TRANSACOES)
+                        navController.navigate(Rotas.TRANSACOES) {
+                            launchSingleTop = true
+                        }
                     },
                     onMeusLimites = {
-                        navController.navigate(Rotas.CARTOES)
+                        navController.navigate(Rotas.CARTOES) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -119,9 +122,7 @@ fun AppNavigation() {
 
                 TelaTransacoes(
                     transacoes = transacoes,
-                    onBack = {
-                        navController.popBackStack()
-                    },
+                    onBack = { voltarParaAnteriorOuHome(navController) },
                     onAdicionar = { descricao, valor, categoria, data ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
@@ -133,18 +134,12 @@ fun AppNavigation() {
                                         data = data
                                     )
                                 )
-
                                 val atualizadas = transacaoDao.buscarTodos()
-
                                 withContext(Dispatchers.Main) {
                                     transacoes = atualizadas
                                 }
                             } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao inserir transação",
-                                    e
-                                )
+                                Log.e(TAG_BANCO, "Erro ao inserir transação", e)
                             }
                         }
                     },
@@ -153,23 +148,20 @@ fun AppNavigation() {
                             try {
                                 transacaoDao.deletar(transacao)
                                 val atualizadas = transacaoDao.buscarTodos()
-
                                 withContext(Dispatchers.Main) {
                                     transacoes = atualizadas
                                 }
                             } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao remover transação",
-                                    e
-                                )
+                                Log.e(TAG_BANCO, "Erro ao remover transação", e)
                             }
                         }
                     },
                     onAbrirDetalhes = { transacao ->
                         navController.navigate(
                             Rotas.detalheTransacao(transacao.id)
-                        )
+                        ) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
@@ -187,8 +179,8 @@ fun AppNavigation() {
                 }
 
                 TelaMeusCartoes(
-                    navController = navController,
                     cartoes = cartoes,
+                    onBack = { voltarParaAnteriorOuHome(navController) },
                     onAdicionar = { nome, finalNumero, tipo, limite, usado ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
@@ -201,18 +193,12 @@ fun AppNavigation() {
                                         usado = usado
                                     )
                                 )
-
                                 val atualizados = cartaoDao.buscarTodos()
-
                                 withContext(Dispatchers.Main) {
                                     cartoes = atualizados
                                 }
                             } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao inserir cartão",
-                                    e
-                                )
+                                Log.e(TAG_BANCO, "Erro ao inserir cartão", e)
                             }
                         }
                     },
@@ -221,16 +207,11 @@ fun AppNavigation() {
                             try {
                                 cartaoDao.deletar(cartao)
                                 val atualizados = cartaoDao.buscarTodos()
-
                                 withContext(Dispatchers.Main) {
                                     cartoes = atualizados
                                 }
                             } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao remover cartão",
-                                    e
-                                )
+                                Log.e(TAG_BANCO, "Erro ao remover cartão", e)
                             }
                         }
                     },
@@ -242,9 +223,7 @@ fun AppNavigation() {
                                         bloqueado = !cartao.bloqueado
                                     )
                                 )
-
                                 val atualizados = cartaoDao.buscarTodos()
-
                                 withContext(Dispatchers.Main) {
                                     cartoes = atualizados
                                 }
@@ -260,16 +239,16 @@ fun AppNavigation() {
                     onAbrirDetalhes = { cartao ->
                         navController.navigate(
                             Rotas.detalheCartao(cartao.id)
-                        )
+                        ) {
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
 
             composable(Rotas.PIX) {
                 TelaPix(
-                    onBack = {
-                        navController.popBackStack()
-                    }
+                    onBack = { voltarParaAnteriorOuHome(navController) }
                 )
             }
 
@@ -282,6 +261,7 @@ fun AppNavigation() {
                 )
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: -1
+
                 var transacaoDetalhe by remember(id) {
                     mutableStateOf<Transacao?>(null)
                 }
@@ -303,9 +283,7 @@ fun AppNavigation() {
 
                 TelaDetalheTransacao(
                     transacao = transacaoDetalhe,
-                    onBack = {
-                        navController.popBackStack()
-                    },
+                    onBack = { voltarParaAnteriorOuHome(navController) },
                     onAtualizar = { atualizado ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
@@ -342,6 +320,7 @@ fun AppNavigation() {
                 )
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: -1
+
                 var cartaoDetalhe by remember(id) {
                     mutableStateOf<Cartao?>(null)
                 }
@@ -363,9 +342,7 @@ fun AppNavigation() {
 
                 TelaDetalheCartao(
                     cartao = cartaoDetalhe,
-                    onBack = {
-                        navController.popBackStack()
-                    },
+                    onBack = { voltarParaAnteriorOuHome(navController) },
                     onAtualizar = { atualizado ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
@@ -393,6 +370,55 @@ fun AppNavigation() {
                 )
             }
         }
+    }
+}
+
+private fun voltarParaAnteriorOuHome(
+    navController: NavHostController
+) {
+    val voltou = navController.popBackStack()
+
+    if (!voltou) {
+        navController.navigate(Rotas.HOME) {
+            popUpTo(Rotas.HOME) {
+                inclusive = false
+            }
+            launchSingleTop = true
+        }
+    }
+}
+
+private fun navegarTelaPrincipal(
+    navController: NavHostController,
+    rota: String
+) {
+    if (navController.currentDestination?.route == rota) return
+
+    if (rota == Rotas.HOME) {
+        val encontrouHome = navController.popBackStack(
+            route = Rotas.HOME,
+            inclusive = false
+        )
+
+        if (!encontrouHome &&
+            navController.currentDestination?.route != Rotas.HOME
+        ) {
+            navController.navigate(Rotas.HOME) {
+                popUpTo(navController.graph.id) {
+                    inclusive = false
+                }
+                launchSingleTop = true
+            }
+        }
+
+        return
+    }
+
+    navController.navigate(rota) {
+        popUpTo(Rotas.HOME) {
+            inclusive = false
+        }
+        launchSingleTop = true
     }
 }
 
@@ -434,18 +460,10 @@ private fun BarraNavegacaoInferior(
             NavigationBarItem(
                 selected = rotaAtual == item.rota,
                 onClick = {
-                    navController.navigate(item.rota) {
-                        popUpTo(
-                            navController.graph
-                                .findStartDestination()
-                                .id
-                        ) {
-                            saveState = true
-                        }
-
-                        launchSingleTop = true
-                        restoreState = true
-                    }
+                    navegarTelaPrincipal(
+                        navController = navController,
+                        rota = item.rota
+                    )
                 },
                 icon = {
                     Icon(
