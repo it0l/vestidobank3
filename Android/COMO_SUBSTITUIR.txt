@@ -1,0 +1,36 @@
+VESTIDO BANK - ATUALIZACAO MVVM
+
+1. Faca uma copia da pasta atual antes de substituir.
+
+2. Dentro de:
+Android/app/src/main/java/com/example/
+
+apague a pasta:
+myapplication
+
+3. Copie a pasta myapplication deste ZIP para o mesmo local.
+
+4. Substitua tambem:
+Android/app/build.gradle.kts
+
+5. No Android Studio:
+File > Sync Project with Gradle Files
+
+6. Rode o projeto.
+
+O banco continua usando o mesmo nome vestidobank.db e as mesmas tabelas transacoes e cartoes.
+Nao foi alterada a versao do banco nem os campos das entidades.
+
+Estrutura:
+data/local
+data/repository
+ui/transacoes
+ui/cartoes
+ui/fatura
+ui/home
+ui/pix
+ui/theme
+navigation
+
+A tela Fatura agora observa a mesma tabela de transacoes usada em Movimentacoes.
+Ao inserir, editar ou excluir uma movimentacao, a Fatura se atualiza automaticamente.

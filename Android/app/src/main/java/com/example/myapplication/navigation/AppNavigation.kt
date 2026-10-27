@@ -1,6 +1,5 @@
 package com.example.myapplication.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CreditCard
@@ -14,13 +13,8 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,22 +22,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.myapplication.TelaHome
-import com.example.myapplication.database.AppDatabase
-import com.example.myapplication.model.Cartao
-import com.example.myapplication.model.Transacao
-import com.example.myapplication.telas.cartoes.TelaDetalheCartao
-import com.example.myapplication.telas.cartoes.TelaMeusCartoes
-import com.example.myapplication.telas.fatura.TelaFatura
-import com.example.myapplication.telas.pix.TelaPix
-import com.example.myapplication.telas.transacoes.TelaDetalheTransacao
-import com.example.myapplication.telas.transacoes.TelaTransacoes
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-
-private const val TAG_BANCO = "VestidoBankDB"
+import com.example.myapplication.ui.cartoes.TelaDetalheCartao
+import com.example.myapplication.ui.cartoes.TelaMeusCartoes
+import com.example.myapplication.ui.fatura.TelaFatura
+import com.example.myapplication.ui.home.TelaHome
+import com.example.myapplication.ui.pix.TelaPix
+import com.example.myapplication.ui.transacoes.TelaDetalheTransacao
+import com.example.myapplication.ui.transacoes.TelaTransacoes
 
 private data class ItemNavegacao(
     val rota: String,
@@ -54,14 +39,6 @@ private data class ItemNavegacao(
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val context = LocalContext.current
-    val database = remember { AppDatabase.getDatabase(context) }
-    val transacaoDao = remember(database) { database.transacaoDao() }
-    val cartaoDao = remember(database) { database.cartaoDao() }
-
-    var transacoes by remember { mutableStateOf<List<Transacao>>(emptyList()) }
-    var cartoes by remember { mutableStateOf<List<Cartao>>(emptyList()) }
-
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rotaAtual = backStackEntry?.destination?.route
 
@@ -89,166 +66,72 @@ fun AppNavigation() {
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(Rotas.HOME) {
-                TelaHome(navController)
+                TelaHome(
+                    navController = navController
+                )
             }
 
             composable(Rotas.FATURA) {
                 TelaFatura(
-                    onBack = { voltarParaAnteriorOuHome(navController) },
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
+                    },
                     onAcessarFatura = {
-                        navController.navigate(Rotas.TRANSACOES) {
-                            launchSingleTop = true
-                        }
+                        navController.navigate(
+                            Rotas.TRANSACOES
+                        )
                     },
                     onMeusLimites = {
-                        navController.navigate(Rotas.CARTOES) {
-                            launchSingleTop = true
-                        }
+                        navController.navigate(
+                            Rotas.CARTOES
+                        )
                     }
                 )
             }
 
             composable(Rotas.TRANSACOES) {
-                LaunchedEffect(Unit) {
-                    transacoes = withContext(Dispatchers.IO) {
-                        try {
-                            transacaoDao.buscarTodos()
-                        } catch (e: Exception) {
-                            Log.e(TAG_BANCO, "Erro ao buscar transações", e)
-                            emptyList()
-                        }
-                    }
-                }
-
                 TelaTransacoes(
-                    transacoes = transacoes,
-                    onBack = { voltarParaAnteriorOuHome(navController) },
-                    onAdicionar = { descricao, valor, categoria, data ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                transacaoDao.inserir(
-                                    Transacao(
-                                        descricao = descricao,
-                                        valor = valor,
-                                        categoria = categoria,
-                                        data = data
-                                    )
-                                )
-                                val atualizadas = transacaoDao.buscarTodos()
-                                withContext(Dispatchers.Main) {
-                                    transacoes = atualizadas
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao inserir transação", e)
-                            }
-                        }
-                    },
-                    onRemover = { transacao ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                transacaoDao.deletar(transacao)
-                                val atualizadas = transacaoDao.buscarTodos()
-                                withContext(Dispatchers.Main) {
-                                    transacoes = atualizadas
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao remover transação", e)
-                            }
-                        }
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
                     },
                     onAbrirDetalhes = { transacao ->
                         navController.navigate(
-                            Rotas.detalheTransacao(transacao.id)
-                        ) {
-                            launchSingleTop = true
-                        }
+                            Rotas.detalheTransacao(
+                                transacao.id
+                            )
+                        )
                     }
                 )
             }
 
             composable(Rotas.CARTOES) {
-                LaunchedEffect(Unit) {
-                    cartoes = withContext(Dispatchers.IO) {
-                        try {
-                            cartaoDao.buscarTodos()
-                        } catch (e: Exception) {
-                            Log.e(TAG_BANCO, "Erro ao buscar cartões", e)
-                            emptyList()
-                        }
-                    }
-                }
-
                 TelaMeusCartoes(
-                    cartoes = cartoes,
-                    onBack = { voltarParaAnteriorOuHome(navController) },
-                    onAdicionar = { nome, finalNumero, tipo, limite, usado ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                cartaoDao.inserir(
-                                    Cartao(
-                                        nome = nome,
-                                        finalNumero = finalNumero,
-                                        tipo = tipo,
-                                        limite = limite,
-                                        usado = usado
-                                    )
-                                )
-                                val atualizados = cartaoDao.buscarTodos()
-                                withContext(Dispatchers.Main) {
-                                    cartoes = atualizados
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao inserir cartão", e)
-                            }
-                        }
-                    },
-                    onRemover = { cartao ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                cartaoDao.deletar(cartao)
-                                val atualizados = cartaoDao.buscarTodos()
-                                withContext(Dispatchers.Main) {
-                                    cartoes = atualizados
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao remover cartão", e)
-                            }
-                        }
-                    },
-                    onAlternarBloqueio = { cartao ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                cartaoDao.atualizar(
-                                    cartao.copy(
-                                        bloqueado = !cartao.bloqueado
-                                    )
-                                )
-                                val atualizados = cartaoDao.buscarTodos()
-                                withContext(Dispatchers.Main) {
-                                    cartoes = atualizados
-                                }
-                            } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao atualizar bloqueio do cartão",
-                                    e
-                                )
-                            }
-                        }
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
                     },
                     onAbrirDetalhes = { cartao ->
                         navController.navigate(
-                            Rotas.detalheCartao(cartao.id)
-                        ) {
-                            launchSingleTop = true
-                        }
+                            Rotas.detalheCartao(
+                                cartao.id
+                            )
+                        )
                     }
                 )
             }
 
             composable(Rotas.PIX) {
                 TelaPix(
-                    onBack = { voltarParaAnteriorOuHome(navController) }
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
+                    }
                 )
             }
 
@@ -260,53 +143,16 @@ fun AppNavigation() {
                     }
                 )
             ) { entry ->
-                val id = entry.arguments?.getInt("id") ?: -1
-
-                var transacaoDetalhe by remember(id) {
-                    mutableStateOf<Transacao?>(null)
-                }
-
-                LaunchedEffect(id) {
-                    transacaoDetalhe = withContext(Dispatchers.IO) {
-                        try {
-                            transacaoDao.buscarPorId(id)
-                        } catch (e: Exception) {
-                            Log.e(
-                                TAG_BANCO,
-                                "Erro ao buscar transação por id",
-                                e
-                            )
-                            null
-                        }
-                    }
-                }
+                val id = entry.arguments
+                    ?.getInt("id")
+                    ?: -1
 
                 TelaDetalheTransacao(
-                    transacao = transacaoDetalhe,
-                    onBack = { voltarParaAnteriorOuHome(navController) },
-                    onAtualizar = { atualizado ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                transacaoDao.atualizar(atualizado)
-
-                                val recarregada =
-                                    transacaoDao.buscarPorId(id)
-
-                                val listaAtualizada =
-                                    transacaoDao.buscarTodos()
-
-                                withContext(Dispatchers.Main) {
-                                    transacaoDetalhe = recarregada
-                                    transacoes = listaAtualizada
-                                }
-                            } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao atualizar transação",
-                                    e
-                                )
-                            }
-                        }
+                    id = id,
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
                     }
                 )
             }
@@ -319,53 +165,16 @@ fun AppNavigation() {
                     }
                 )
             ) { entry ->
-                val id = entry.arguments?.getInt("id") ?: -1
-
-                var cartaoDetalhe by remember(id) {
-                    mutableStateOf<Cartao?>(null)
-                }
-
-                LaunchedEffect(id) {
-                    cartaoDetalhe = withContext(Dispatchers.IO) {
-                        try {
-                            cartaoDao.buscarPorId(id)
-                        } catch (e: Exception) {
-                            Log.e(
-                                TAG_BANCO,
-                                "Erro ao buscar cartão por id",
-                                e
-                            )
-                            null
-                        }
-                    }
-                }
+                val id = entry.arguments
+                    ?.getInt("id")
+                    ?: -1
 
                 TelaDetalheCartao(
-                    cartao = cartaoDetalhe,
-                    onBack = { voltarParaAnteriorOuHome(navController) },
-                    onAtualizar = { atualizado ->
-                        CoroutineScope(Dispatchers.IO).launch {
-                            try {
-                                cartaoDao.atualizar(atualizado)
-
-                                val recarregado =
-                                    cartaoDao.buscarPorId(id)
-
-                                val listaAtualizada =
-                                    cartaoDao.buscarTodos()
-
-                                withContext(Dispatchers.Main) {
-                                    cartaoDetalhe = recarregado
-                                    cartoes = listaAtualizada
-                                }
-                            } catch (e: Exception) {
-                                Log.e(
-                                    TAG_BANCO,
-                                    "Erro ao atualizar cartão",
-                                    e
-                                )
-                            }
-                        }
+                    id = id,
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
                     }
                 )
             }
@@ -379,10 +188,15 @@ private fun voltarParaAnteriorOuHome(
     val voltou = navController.popBackStack()
 
     if (!voltou) {
-        navController.navigate(Rotas.HOME) {
-            popUpTo(Rotas.HOME) {
+        navController.navigate(
+            Rotas.HOME
+        ) {
+            popUpTo(
+                Rotas.HOME
+            ) {
                 inclusive = false
             }
+
             launchSingleTop = true
         }
     }
@@ -392,7 +206,11 @@ private fun navegarTelaPrincipal(
     navController: NavHostController,
     rota: String
 ) {
-    if (navController.currentDestination?.route == rota) return
+    if (
+        navController.currentDestination?.route == rota
+    ) {
+        return
+    }
 
     if (rota == Rotas.HOME) {
         val encontrouHome = navController.popBackStack(
@@ -400,13 +218,19 @@ private fun navegarTelaPrincipal(
             inclusive = false
         )
 
-        if (!encontrouHome &&
+        if (
+            !encontrouHome &&
             navController.currentDestination?.route != Rotas.HOME
         ) {
-            navController.navigate(Rotas.HOME) {
-                popUpTo(navController.graph.id) {
+            navController.navigate(
+                Rotas.HOME
+            ) {
+                popUpTo(
+                    navController.graph.id
+                ) {
                     inclusive = false
                 }
+
                 launchSingleTop = true
             }
         }
@@ -414,10 +238,15 @@ private fun navegarTelaPrincipal(
         return
     }
 
-    navController.navigate(rota) {
-        popUpTo(Rotas.HOME) {
+    navController.navigate(
+        rota
+    ) {
+        popUpTo(
+            Rotas.HOME
+        ) {
             inclusive = false
         }
+
         launchSingleTop = true
     }
 }
@@ -472,7 +301,9 @@ private fun BarraNavegacaoInferior(
                     )
                 },
                 label = {
-                    Text(item.titulo)
+                    Text(
+                        item.titulo
+                    )
                 }
             )
         }

@@ -1,4 +1,4 @@
-package com.example.myapplication.telas.transacoes
+package com.example.myapplication.ui.transacoes
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,16 +29,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myapplication.model.Transacao
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.data.local.AppDatabase
+import com.example.myapplication.data.local.Transacao
+import com.example.myapplication.data.repository.TransacaoRepository
 
 private val VestidoPink = Color(0xFFE6007E)
 private val Fundo = Color(0xFFF2F2F2)
@@ -47,17 +49,17 @@ private val TextoEscuro = Color(0xFF202020)
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun TelaTransacoes(
-    transacoes: List<Transacao>,
-    onAdicionar: (String, Double, String, String) -> Unit,
-    onRemover: (Transacao) -> Unit,
     onAbrirDetalhes: (Transacao) -> Unit,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit,
+    viewModel: TransacoesViewModel = viewModel(
+        factory = TransacoesViewModelFactory(
+            TransacaoRepository(
+                AppDatabase.getDatabase(LocalContext.current).transacaoDao()
+            )
+        )
+    )
 ) {
-    var descricao by remember { mutableStateOf("") }
-    var valor by remember { mutableStateOf("") }
-    var categoria by remember { mutableStateOf("") }
-    var data by remember { mutableStateOf("") }
-    var erro by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = Fundo,
@@ -94,94 +96,79 @@ fun TelaTransacoes(
         ) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
+
                 Text(
                     text = "Adicionar movimentação",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextoEscuro
                 )
+
                 Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
                     text = "Cadastre uma nova movimentação na conta.",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )
+
                 Spacer(modifier = Modifier.height(14.dp))
 
                 OutlinedTextField(
-                    value = descricao,
-                    onValueChange = { descricao = it },
+                    value = uiState.descricao,
+                    onValueChange = viewModel::onDescricaoChange,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Descrição") },
                     singleLine = true,
                     colors = coresCampo()
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = valor,
-                    onValueChange = { valor = it },
+                    value = uiState.valor,
+                    onValueChange = viewModel::onValorChange,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Valor") },
                     prefix = { Text("R$ ") },
                     singleLine = true,
                     colors = coresCampo()
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = categoria,
-                    onValueChange = { categoria = it },
+                    value = uiState.categoria,
+                    onValueChange = viewModel::onCategoriaChange,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Categoria") },
                     singleLine = true,
                     colors = coresCampo()
                 )
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = data,
-                    onValueChange = { data = it },
+                    value = uiState.data,
+                    onValueChange = viewModel::onDataChange,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("Data (dd/mm/aaaa)") },
                     singleLine = true,
                     colors = coresCampo()
                 )
 
-                if (erro.isNotBlank()) {
+                if (uiState.erro.isNotBlank()) {
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text(text = erro, color = Color(0xFFB00020))
+                    Text(
+                        text = uiState.erro,
+                        color = Color(0xFFB00020)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
-                    onClick = {
-                        val valorNumerico = valor.replace(",", ".").toDoubleOrNull()
-
-                        if (
-                            descricao.isBlank() ||
-                            categoria.isBlank() ||
-                            data.isBlank() ||
-                            valorNumerico == null ||
-                            valorNumerico <= 0
-                        ) {
-                            erro = "Preencha todos os campos corretamente."
-                        } else {
-                            onAdicionar(
-                                descricao,
-                                valorNumerico,
-                                categoria,
-                                data
-                            )
-
-                            descricao = ""
-                            valor = ""
-                            categoria = ""
-                            data = ""
-                            erro = ""
-                        }
-                    },
+                    onClick = viewModel::onAdicionar,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = VestidoPink,
@@ -204,20 +191,22 @@ fun TelaTransacoes(
                 )
 
                 Text(
-                    text = "${transacoes.size} movimentação(ões)",
+                    text = "${uiState.transacoes.size} movimentação(ões)",
                     fontSize = 13.sp,
                     color = Color.Gray
                 )
             }
 
             items(
-                items = transacoes,
+                items = uiState.transacoes,
                 key = { it.id }
             ) { transacao ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onAbrirDetalhes(transacao) },
+                        .clickable {
+                            onAbrirDetalhes(transacao)
+                        },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White
@@ -233,7 +222,9 @@ fun TelaTransacoes(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(
+                            modifier = Modifier.weight(1f)
+                        ) {
                             Text(
                                 text = transacao.descricao,
                                 fontWeight = FontWeight.Bold,
@@ -260,7 +251,9 @@ fun TelaTransacoes(
                         }
 
                         IconButton(
-                            onClick = { onRemover(transacao) }
+                            onClick = {
+                                viewModel.onDeletar(transacao)
+                            }
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,

@@ -1,11 +1,9 @@
-package com.example.myapplication.database
+package com.example.myapplication.data.local
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.myapplication.model.Cartao
-import com.example.myapplication.model.Transacao
 
 @Database(
     entities = [Transacao::class, Cartao::class],
@@ -22,7 +20,13 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         fun getDatabase(context: Context): AppDatabase {
-            return INSTANCE ?: synchronized(this) {
+            val tempInstance = INSTANCE
+
+            if (tempInstance != null) {
+                return tempInstance
+            }
+
+            synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
@@ -30,7 +34,7 @@ abstract class AppDatabase : RoomDatabase() {
                 ).build()
 
                 INSTANCE = instance
-                instance
+                return instance
             }
         }
     }

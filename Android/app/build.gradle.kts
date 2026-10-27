@@ -6,6 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
+
     compileSdk {
         version = release(37)
     }
@@ -50,7 +51,10 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.9.5")
 
-    // Trabalho 3 - Room + KSP, no mesmo padrão do enunciado.
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.11.0")
+
     val roomVersion = "2.8.5"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")

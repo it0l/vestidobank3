@@ -1,4 +1,4 @@
-package com.example.myapplication.telas.cartoes
+package com.example.myapplication.ui.cartoes
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,20 +33,22 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.R
-import com.example.myapplication.model.Cartao
+import com.example.myapplication.data.local.AppDatabase
+import com.example.myapplication.data.local.Cartao
+import com.example.myapplication.data.repository.CartaoRepository
 
 private val Background = Color(0xFFF0F1F5)
 private val VestidoPink = Color(0xFFE31A6B)
@@ -55,29 +57,25 @@ private val TextColor = Color(0xFF050505)
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun TelaMeusCartoes(
-    cartoes: List<Cartao>,
-    onAdicionar: (String, String, String, Double, Double) -> Unit,
-    onRemover: (Cartao) -> Unit,
-    onAlternarBloqueio: (Cartao) -> Unit,
     onAbrirDetalhes: (Cartao) -> Unit,
-    onBack: () -> Unit = {}
+    onBack: () -> Unit,
+    viewModel: CartoesViewModel = viewModel(
+        factory = CartoesViewModelFactory(
+            CartaoRepository(
+                AppDatabase.getDatabase(LocalContext.current).cartaoDao()
+            )
+        )
+    )
 ) {
-    var mostrarFormulario by remember { mutableStateOf(false) }
-    var modoBloqueio by remember { mutableStateOf(false) }
-    var mensagemAcao by remember { mutableStateOf("") }
-
-    var nome by remember { mutableStateOf("") }
-    var finalNumero by remember { mutableStateOf("") }
-    var tipo by remember { mutableStateOf("") }
-    var limite by remember { mutableStateOf("") }
-    var usado by remember { mutableStateOf("") }
-    var erro by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = Background,
         topBar = {
             TopAppBar(
-                title = { Text("Meus cartões") },
+                title = {
+                    Text("Meus cartões")
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -121,10 +119,7 @@ fun TelaMeusCartoes(
                         iconRes = R.drawable.ic_vestido_mais,
                         title = "Criar cartão\nvirtual",
                         iconSize = 30.dp,
-                        onClick = {
-                            mostrarFormulario = !mostrarFormulario
-                            mensagemAcao = ""
-                        }
+                        onClick = viewModel::onAlternarFormulario
                     )
 
                     ActionItem(
@@ -132,14 +127,7 @@ fun TelaMeusCartoes(
                         iconRes = R.drawable.ic_vestido_cadeado,
                         title = "Bloquear\ncartões",
                         iconSize = 29.dp,
-                        onClick = {
-                            modoBloqueio = !modoBloqueio
-                            mensagemAcao = if (modoBloqueio) {
-                                "Marque abaixo os cartões que deseja bloquear."
-                            } else {
-                                "Modo de bloqueio fechado."
-                            }
-                        }
+                        onClick = viewModel::onAlternarModoBloqueio
                     )
 
                     ActionItem(
@@ -147,10 +135,7 @@ fun TelaMeusCartoes(
                         iconRes = R.drawable.ic_vestido_carteira,
                         title = "Adicionar à\ncarteira",
                         iconSize = 30.dp,
-                        onClick = {
-                            mensagemAcao =
-                                "${cartoes.size} cartão(ões) preparado(s) para a carteira."
-                        }
+                        onClick = viewModel::onCarteira
                     )
 
                     ActionItem(
@@ -159,25 +144,22 @@ fun TelaMeusCartoes(
                         title = "Ajustar limites",
                         iconSize = 30.dp,
                         onClick = {
-                            cartoes.firstOrNull()?.let(onAbrirDetalhes)
-
-                            if (cartoes.isEmpty()) {
-                                mensagemAcao =
-                                    "Adicione um cartão primeiro."
-                            }
+                            uiState.cartoes.firstOrNull()?.let(
+                                onAbrirDetalhes
+                            )
                         }
                     )
                 }
 
-                if (mensagemAcao.isNotBlank()) {
+                if (uiState.mensagemAcao.isNotBlank()) {
                     Text(
-                        text = mensagemAcao,
+                        text = uiState.mensagemAcao,
                         modifier = Modifier.padding(top = 12.dp),
                         color = Color.DarkGray
                     )
                 }
 
-                if (mostrarFormulario) {
+                if (uiState.mostrarFormulario) {
                     Spacer(modifier = Modifier.height(18.dp))
 
                     Text(
@@ -187,91 +169,55 @@ fun TelaMeusCartoes(
                     )
 
                     OutlinedTextField(
-                        value = nome,
-                        onValueChange = { nome = it },
+                        value = uiState.nome,
+                        onValueChange = viewModel::onNomeChange,
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Nome do cartão") },
                         singleLine = true
                     )
 
                     OutlinedTextField(
-                        value = finalNumero,
-                        onValueChange = {
-                            finalNumero = it.take(4)
-                        },
+                        value = uiState.finalNumero,
+                        onValueChange = viewModel::onFinalNumeroChange,
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("4 últimos números") },
                         singleLine = true
                     )
 
                     OutlinedTextField(
-                        value = tipo,
-                        onValueChange = { tipo = it },
+                        value = uiState.tipo,
+                        onValueChange = viewModel::onTipoChange,
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Tipo/uso") },
                         singleLine = true
                     )
 
                     OutlinedTextField(
-                        value = limite,
-                        onValueChange = { limite = it },
+                        value = uiState.limite,
+                        onValueChange = viewModel::onLimiteChange,
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Limite") },
                         singleLine = true
                     )
 
                     OutlinedTextField(
-                        value = usado,
-                        onValueChange = { usado = it },
+                        value = uiState.usado,
+                        onValueChange = viewModel::onUsadoChange,
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text("Valor usado") },
                         singleLine = true
                     )
 
-                    if (erro.isNotBlank()) {
+                    if (uiState.erro.isNotBlank()) {
                         Text(
-                            text = erro,
+                            text = uiState.erro,
                             color = Color(0xFFB00020),
                             modifier = Modifier.padding(top = 4.dp)
                         )
                     }
 
                     Button(
-                        onClick = {
-                            val limiteNumerico =
-                                limite.replace(",", ".").toDoubleOrNull()
-
-                            val usadoNumerico =
-                                usado.replace(",", ".").toDoubleOrNull()
-
-                            if (
-                                nome.isBlank() ||
-                                finalNumero.length != 4 ||
-                                tipo.isBlank() ||
-                                limiteNumerico == null ||
-                                usadoNumerico == null
-                            ) {
-                                erro = "Preencha os campos corretamente."
-                            } else {
-                                onAdicionar(
-                                    nome,
-                                    finalNumero,
-                                    tipo,
-                                    limiteNumerico,
-                                    usadoNumerico
-                                )
-
-                                nome = ""
-                                finalNumero = ""
-                                tipo = ""
-                                limite = ""
-                                usado = ""
-                                erro = ""
-                                mostrarFormulario = false
-                                mensagemAcao =
-                                    "Cartão adicionado com sucesso."
-                            }
-                        },
+                        onClick = viewModel::onAdicionar,
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp)
@@ -283,7 +229,7 @@ fun TelaMeusCartoes(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Cartões cadastrados (${cartoes.size})",
+                    text = "Cartões cadastrados (${uiState.cartoes.size})",
                     color = TextColor,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold
@@ -291,7 +237,7 @@ fun TelaMeusCartoes(
             }
 
             items(
-                items = cartoes,
+                items = uiState.cartoes,
                 key = { it.id }
             ) { cartao ->
                 Card(
@@ -333,8 +279,7 @@ fun TelaMeusCartoes(
                             )
 
                             Text(
-                                text =
-                                    "•••• ${cartao.finalNumero} • ${cartao.tipo}",
+                                text = "•••• ${cartao.finalNumero} • ${cartao.tipo}",
                                 color = Color.White.copy(alpha = 0.9f)
                             )
 
@@ -349,18 +294,18 @@ fun TelaMeusCartoes(
                             )
                         }
 
-                        if (modoBloqueio) {
+                        if (uiState.modoBloqueio) {
                             Checkbox(
                                 checked = cartao.bloqueado,
                                 onCheckedChange = {
-                                    onAlternarBloqueio(cartao)
+                                    viewModel.onAlternarBloqueio(cartao)
                                 }
                             )
                         }
 
                         IconButton(
                             onClick = {
-                                onRemover(cartao)
+                                viewModel.onDeletar(cartao)
                             }
                         ) {
                             Icon(

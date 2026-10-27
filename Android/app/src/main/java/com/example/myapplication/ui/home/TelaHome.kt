@@ -1,4 +1,4 @@
-package com.example.myapplication
+package com.example.myapplication.ui.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,43 +46,74 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.myapplication.navigation.Rotas
 
-val PinkPrimary = Color(0xFFE6007E)
-val PinkLight = Color(0xFFF7DCE1)
-val BackgroundGray = Color(0xFFF2F2F2)
+private val PinkPrimary = Color(0xFFE6007E)
+private val PinkLight = Color(0xFFF7DCE1)
+private val BackgroundGray = Color(0xFFF2F2F2)
 
 @Composable
-fun TelaHome(navController: NavHostController) {
+fun TelaHome(
+    navController: NavHostController
+) {
     Scaffold(
         containerColor = BackgroundGray,
-        topBar = { CabecalhoRosa() }
+        topBar = {
+            CabecalhoRosa()
+        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(
+                modifier = Modifier.height(32.dp)
+            )
+
             SaldoConta()
-            Spacer(modifier = Modifier.height(34.dp))
+
+            Spacer(
+                modifier = Modifier.height(34.dp)
+            )
 
             AcoesRapidas(
-                onPix = { navController.navigate(Rotas.PIX) },
-                onTrazerDinheiro = { navController.navigate(Rotas.PIX) },
-                onPagar = { navController.navigate(Rotas.FATURA) },
-                onRecarga = { navController.navigate(Rotas.PIX) }
+                onPix = {
+                    navController.navigate(Rotas.PIX)
+                },
+                onTrazerDinheiro = {
+                    navController.navigate(Rotas.PIX)
+                },
+                onPagar = {
+                    navController.navigate(Rotas.FATURA)
+                },
+                onRecarga = {
+                    navController.navigate(Rotas.PIX)
+                }
             )
 
-            Spacer(modifier = Modifier.height(34.dp))
+            Spacer(
+                modifier = Modifier.height(34.dp)
+            )
+
             BannerInvestimentos()
-            Spacer(modifier = Modifier.height(20.dp))
+
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
 
             CartaoMeusCartoes(
-                onClick = { navController.navigate(Rotas.CARTOES) }
+                onClick = {
+                    navController.navigate(Rotas.CARTOES)
+                }
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(
+                modifier = Modifier.height(20.dp)
+            )
+
             CartaoEmprestimo(
-                onClick = { navController.navigate(Rotas.CARTOES) }
+                onClick = {
+                    navController.navigate(Rotas.CARTOES)
+                }
             )
         }
     }
@@ -90,7 +121,7 @@ fun TelaHome(navController: NavHostController) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CabecalhoRosa() {
+private fun CabecalhoRosa() {
     TopAppBar(
         title = {
             Text(
@@ -104,41 +135,87 @@ fun CabecalhoRosa() {
                 imageVector = Icons.Default.Person,
                 contentDescription = "Perfil",
                 tint = Color.White,
-                modifier = Modifier.padding(start = 12.dp)
+                modifier = Modifier.padding(
+                    start = 12.dp
+                )
             )
         },
         actions = {
-            Icon(Icons.Default.Visibility, "Visibilidade", tint = Color.White)
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(Icons.Default.Build, "Configurações", tint = Color.White)
-            Spacer(modifier = Modifier.width(16.dp))
-            Icon(Icons.Default.Menu, "Menu", tint = Color.White)
-            Spacer(modifier = Modifier.width(12.dp))
+            Icon(
+                Icons.Default.Visibility,
+                "Visibilidade",
+                tint = Color.White
+            )
+
+            Spacer(
+                modifier = Modifier.width(16.dp)
+            )
+
+            Icon(
+                Icons.Default.Build,
+                "Configurações",
+                tint = Color.White
+            )
+
+            Spacer(
+                modifier = Modifier.width(16.dp)
+            )
+
+            Icon(
+                Icons.Default.Menu,
+                "Menu",
+                tint = Color.White
+            )
+
+            Spacer(
+                modifier = Modifier.width(12.dp)
+            )
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = PinkPrimary)
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = PinkPrimary
+        )
     )
 }
 
 @Composable
-fun SaldoConta() {
+private fun SaldoConta() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
+            .padding(
+                horizontal = 20.dp
+            ),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text(text = "Saldo em conta", fontSize = 22.sp, color = Color.Gray)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "R$67,67", fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "Saldo em conta",
+                fontSize = 22.sp,
+                color = Color.Gray
+            )
+
+            Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "R$67,67",
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.DarkGray)
+
+        Icon(
+            Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = Color.DarkGray
+        )
     }
 }
 
 @Composable
-fun AcoesRapidas(
+private fun AcoesRapidas(
     onPix: () -> Unit,
     onTrazerDinheiro: () -> Unit,
     onPagar: () -> Unit,
@@ -147,18 +224,39 @@ fun AcoesRapidas(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+            .padding(
+                horizontal = 8.dp
+            ),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        AcaoCircular(Icons.Default.Diamond, "PIX", onPix)
-        AcaoCircular(Icons.Default.ArrowDownward, "Trazer dinheiro", onTrazerDinheiro)
-        AcaoCircular(Icons.Default.ShoppingBag, "Pagar", onPagar)
-        AcaoCircular(Icons.Default.Call, "Recarga", onRecarga)
+        AcaoCircular(
+            Icons.Default.Diamond,
+            "PIX",
+            onPix
+        )
+
+        AcaoCircular(
+            Icons.Default.ArrowDownward,
+            "Trazer dinheiro",
+            onTrazerDinheiro
+        )
+
+        AcaoCircular(
+            Icons.Default.ShoppingBag,
+            "Pagar",
+            onPagar
+        )
+
+        AcaoCircular(
+            Icons.Default.Call,
+            "Recarga",
+            onRecarga
+        )
     }
 }
 
 @Composable
-fun AcaoCircular(
+private fun AcaoCircular(
     icon: ImageVector,
     texto: String,
     onClick: () -> Unit
@@ -171,13 +269,23 @@ fun AcaoCircular(
             onClick = onClick,
             modifier = Modifier.size(56.dp),
             shape = RoundedCornerShape(50),
-            colors = ButtonDefaults.buttonColors(containerColor = PinkPrimary),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = PinkPrimary
+            ),
             contentPadding = PaddingValues(0.dp),
             elevation = null
         ) {
-            Icon(icon, texto, tint = Color.White)
+            Icon(
+                icon,
+                texto,
+                tint = Color.White
+            )
         }
-        Spacer(modifier = Modifier.height(6.dp))
+
+        Spacer(
+            modifier = Modifier.height(6.dp)
+        )
+
         Text(
             text = texto,
             fontSize = 11.sp,
@@ -188,18 +296,23 @@ fun AcaoCircular(
 }
 
 @Composable
-fun BannerInvestimentos() {
+private fun BannerInvestimentos() {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(
+                horizontal = 16.dp
+            ),
         shape = RoundedCornerShape(16.dp),
         color = PinkPrimary
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 28.dp),
+                .padding(
+                    horizontal = 16.dp,
+                    vertical = 28.dp
+                ),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -208,7 +321,11 @@ fun BannerInvestimentos() {
                 tint = Color.White,
                 modifier = Modifier.size(32.dp)
             )
-            Spacer(modifier = Modifier.width(22.dp))
+
+            Spacer(
+                modifier = Modifier.width(22.dp)
+            )
+
             Column {
                 Text(
                     text = "Investimentos",
@@ -216,6 +333,7 @@ fun BannerInvestimentos() {
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp
                 )
+
                 Text(
                     text = "Confira as melhores ações do momento!",
                     color = Color.White,
@@ -227,12 +345,18 @@ fun BannerInvestimentos() {
 }
 
 @Composable
-fun CartaoMeusCartoes(onClick: () -> Unit) {
+private fun CartaoMeusCartoes(
+    onClick: () -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clickable(onClick = onClick),
+            .padding(
+                horizontal = 16.dp
+            )
+            .clickable(
+                onClick = onClick
+            ),
         shape = RoundedCornerShape(20.dp),
         color = PinkLight
     ) {
@@ -243,19 +367,33 @@ fun CartaoMeusCartoes(onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Meus cartões", fontWeight = FontWeight.Medium)
-            Icon(Icons.Default.CreditCard, contentDescription = null, tint = Color.DarkGray)
+            Text(
+                text = "Meus cartões",
+                fontWeight = FontWeight.Medium
+            )
+
+            Icon(
+                Icons.Default.CreditCard,
+                contentDescription = null,
+                tint = Color.DarkGray
+            )
         }
     }
 }
 
 @Composable
-fun CartaoEmprestimo(onClick: () -> Unit) {
+private fun CartaoEmprestimo(
+    onClick: () -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .clickable(onClick = onClick),
+            .padding(
+                horizontal = 16.dp
+            )
+            .clickable(
+                onClick = onClick
+            ),
         shape = RoundedCornerShape(20.dp),
         color = PinkLight
     ) {
@@ -267,14 +405,23 @@ fun CartaoEmprestimo(onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column {
-                Text(text = "Empréstimo", fontWeight = FontWeight.Medium)
+                Text(
+                    text = "Empréstimo",
+                    fontWeight = FontWeight.Medium
+                )
+
                 Text(
                     text = "Valor disponível de até: R$50.000",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.DarkGray)
+
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = Color.DarkGray
+            )
         }
     }
 }

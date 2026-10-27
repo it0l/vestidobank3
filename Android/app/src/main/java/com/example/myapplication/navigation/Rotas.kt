@@ -9,6 +9,11 @@ object Rotas {
     const val DETALHE_TRANSACAO = "detalhe_transacao"
     const val DETALHE_CARTAO = "detalhe_cartao"
 
-    fun detalheTransacao(id: Int) = "$DETALHE_TRANSACAO/$id"
-    fun detalheCartao(id: Int) = "$DETALHE_CARTAO/$id"
+    fun detalheTransacao(id: Int): String {
+        return "$DETALHE_TRANSACAO/$id"
+    }
+
+    fun detalheCartao(id: Int): String {
+        return "$DETALHE_CARTAO/$id"
+    }
 }
