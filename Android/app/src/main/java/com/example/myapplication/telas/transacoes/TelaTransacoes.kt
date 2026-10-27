@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,7 +50,8 @@ fun TelaTransacoes(
     transacoes: List<Transacao>,
     onAdicionar: (String, Double, String, String) -> Unit,
     onRemover: (Transacao) -> Unit,
-    onAbrirDetalhes: (Transacao) -> Unit
+    onAbrirDetalhes: (Transacao) -> Unit,
+    onBack: () -> Unit = {}
 ) {
     var descricao by remember { mutableStateOf("") }
     var valor by remember { mutableStateOf("") }
@@ -68,7 +70,18 @@ fun TelaTransacoes(
                         fontWeight = FontWeight.Bold
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = VestidoPink)
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar",
+                            tint = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = VestidoPink
+                )
             )
         }
     ) { paddingValues ->
@@ -104,6 +117,7 @@ fun TelaTransacoes(
                     colors = coresCampo()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = valor,
                     onValueChange = { valor = it },
@@ -114,6 +128,7 @@ fun TelaTransacoes(
                     colors = coresCampo()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = categoria,
                     onValueChange = { categoria = it },
@@ -123,6 +138,7 @@ fun TelaTransacoes(
                     colors = coresCampo()
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = data,
                     onValueChange = { data = it },
@@ -138,9 +154,11 @@ fun TelaTransacoes(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
+
                 Button(
                     onClick = {
                         val valorNumerico = valor.replace(",", ".").toDoubleOrNull()
+
                         if (
                             descricao.isBlank() ||
                             categoria.isBlank() ||
@@ -150,7 +168,13 @@ fun TelaTransacoes(
                         ) {
                             erro = "Preencha todos os campos corretamente."
                         } else {
-                            onAdicionar(descricao, valorNumerico, categoria, data)
+                            onAdicionar(
+                                descricao,
+                                valorNumerico,
+                                categoria,
+                                data
+                            )
+
                             descricao = ""
                             valor = ""
                             categoria = ""
@@ -164,16 +188,21 @@ fun TelaTransacoes(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("Adicionar movimentação", fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "Adicionar movimentação",
+                        fontWeight = FontWeight.Bold
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(22.dp))
+
                 Text(
                     text = "Histórico",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextoEscuro
                 )
+
                 Text(
                     text = "${transacoes.size} movimentação(ões)",
                     fontSize = 13.sp,
@@ -181,14 +210,21 @@ fun TelaTransacoes(
                 )
             }
 
-            items(items = transacoes, key = { it.id }) { transacao ->
+            items(
+                items = transacoes,
+                key = { it.id }
+            ) { transacao ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { onAbrirDetalhes(transacao) },
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 2.dp
+                    )
                 ) {
                     Row(
                         modifier = Modifier
@@ -204,13 +240,17 @@ fun TelaTransacoes(
                                 fontSize = 17.sp,
                                 color = TextoEscuro
                             )
+
                             Spacer(modifier = Modifier.height(3.dp))
+
                             Text(
                                 text = "${transacao.categoria} • ${transacao.data}",
                                 color = Color.Gray,
                                 fontSize = 13.sp
                             )
+
                             Spacer(modifier = Modifier.height(7.dp))
+
                             Text(
                                 text = "R$ %.2f".format(transacao.valor),
                                 color = VestidoPink,
@@ -219,7 +259,9 @@ fun TelaTransacoes(
                             )
                         }
 
-                        IconButton(onClick = { onRemover(transacao) }) {
+                        IconButton(
+                            onClick = { onRemover(transacao) }
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
                                 contentDescription = "Remover movimentação",
@@ -230,7 +272,9 @@ fun TelaTransacoes(
                 }
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 }

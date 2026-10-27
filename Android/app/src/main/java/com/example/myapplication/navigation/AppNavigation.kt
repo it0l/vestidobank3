@@ -60,12 +60,12 @@ fun AppNavigation() {
     val transacaoDao = remember(database) { database.transacaoDao() }
     val cartaoDao = remember(database) { database.cartaoDao() }
 
-    // As listas exibidas pela interface são sempre recarregadas a partir do Room.
     var transacoes by remember { mutableStateOf<List<Transacao>>(emptyList()) }
     var cartoes by remember { mutableStateOf<List<Cartao>>(emptyList()) }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rotaAtual = backStackEntry?.destination?.route
+
     val rotasPrincipais = setOf(
         Rotas.HOME,
         Rotas.FATURA,
@@ -96,13 +96,16 @@ fun AppNavigation() {
             composable(Rotas.FATURA) {
                 TelaFatura(
                     onBack = { navController.popBackStack() },
-                    onAcessarFatura = { navController.navigate(Rotas.TRANSACOES) },
-                    onMeusLimites = { navController.navigate(Rotas.CARTOES) }
+                    onAcessarFatura = {
+                        navController.navigate(Rotas.TRANSACOES)
+                    },
+                    onMeusLimites = {
+                        navController.navigate(Rotas.CARTOES)
+                    }
                 )
             }
 
             composable(Rotas.TRANSACOES) {
-                // Requisito do Trabalho 3: ao entrar na lista, buscar do banco.
                 LaunchedEffect(Unit) {
                     transacoes = withContext(Dispatchers.IO) {
                         try {
@@ -116,6 +119,9 @@ fun AppNavigation() {
 
                 TelaTransacoes(
                     transacoes = transacoes,
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     onAdicionar = { descricao, valor, categoria, data ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
@@ -127,12 +133,18 @@ fun AppNavigation() {
                                         data = data
                                     )
                                 )
+
                                 val atualizadas = transacaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     transacoes = atualizadas
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao inserir transação", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao inserir transação",
+                                    e
+                                )
                             }
                         }
                     },
@@ -141,22 +153,28 @@ fun AppNavigation() {
                             try {
                                 transacaoDao.deletar(transacao)
                                 val atualizadas = transacaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     transacoes = atualizadas
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao remover transação", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao remover transação",
+                                    e
+                                )
                             }
                         }
                     },
                     onAbrirDetalhes = { transacao ->
-                        navController.navigate(Rotas.detalheTransacao(transacao.id))
+                        navController.navigate(
+                            Rotas.detalheTransacao(transacao.id)
+                        )
                     }
                 )
             }
 
             composable(Rotas.CARTOES) {
-                // Requisito do Trabalho 3: ao entrar na lista, buscar do banco.
                 LaunchedEffect(Unit) {
                     cartoes = withContext(Dispatchers.IO) {
                         try {
@@ -183,12 +201,18 @@ fun AppNavigation() {
                                         usado = usado
                                     )
                                 )
+
                                 val atualizados = cartaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     cartoes = atualizados
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao inserir cartão", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao inserir cartão",
+                                    e
+                                )
                             }
                         }
                     },
@@ -197,11 +221,16 @@ fun AppNavigation() {
                             try {
                                 cartaoDao.deletar(cartao)
                                 val atualizados = cartaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     cartoes = atualizados
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao remover cartão", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao remover cartão",
+                                    e
+                                )
                             }
                         }
                     },
@@ -209,41 +238,64 @@ fun AppNavigation() {
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
                                 cartaoDao.atualizar(
-                                    cartao.copy(bloqueado = !cartao.bloqueado)
+                                    cartao.copy(
+                                        bloqueado = !cartao.bloqueado
+                                    )
                                 )
+
                                 val atualizados = cartaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     cartoes = atualizados
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao atualizar bloqueio do cartão", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao atualizar bloqueio do cartão",
+                                    e
+                                )
                             }
                         }
                     },
                     onAbrirDetalhes = { cartao ->
-                        navController.navigate(Rotas.detalheCartao(cartao.id))
+                        navController.navigate(
+                            Rotas.detalheCartao(cartao.id)
+                        )
                     }
                 )
             }
 
             composable(Rotas.PIX) {
-                TelaPix(onBack = { navController.popBackStack() })
+                TelaPix(
+                    onBack = {
+                        navController.popBackStack()
+                    }
+                )
             }
 
             composable(
                 route = "${Rotas.DETALHE_TRANSACAO}/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.IntType })
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.IntType
+                    }
+                )
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: -1
-                var transacaoDetalhe by remember(id) { mutableStateOf<Transacao?>(null) }
+                var transacaoDetalhe by remember(id) {
+                    mutableStateOf<Transacao?>(null)
+                }
 
-                // A tela de detalhes consulta o Room diretamente usando o id da rota.
                 LaunchedEffect(id) {
                     transacaoDetalhe = withContext(Dispatchers.IO) {
                         try {
                             transacaoDao.buscarPorId(id)
                         } catch (e: Exception) {
-                            Log.e(TAG_BANCO, "Erro ao buscar transação por id", e)
+                            Log.e(
+                                TAG_BANCO,
+                                "Erro ao buscar transação por id",
+                                e
+                            )
                             null
                         }
                     }
@@ -251,19 +303,30 @@ fun AppNavigation() {
 
                 TelaDetalheTransacao(
                     transacao = transacaoDetalhe,
-                    onBack = { navController.popBackStack() },
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     onAtualizar = { atualizado ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
                                 transacaoDao.atualizar(atualizado)
-                                val recarregada = transacaoDao.buscarPorId(id)
-                                val listaAtualizada = transacaoDao.buscarTodos()
+
+                                val recarregada =
+                                    transacaoDao.buscarPorId(id)
+
+                                val listaAtualizada =
+                                    transacaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     transacaoDetalhe = recarregada
                                     transacoes = listaAtualizada
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao atualizar transação", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao atualizar transação",
+                                    e
+                                )
                             }
                         }
                     }
@@ -272,18 +335,27 @@ fun AppNavigation() {
 
             composable(
                 route = "${Rotas.DETALHE_CARTAO}/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.IntType })
+                arguments = listOf(
+                    navArgument("id") {
+                        type = NavType.IntType
+                    }
+                )
             ) { entry ->
                 val id = entry.arguments?.getInt("id") ?: -1
-                var cartaoDetalhe by remember(id) { mutableStateOf<Cartao?>(null) }
+                var cartaoDetalhe by remember(id) {
+                    mutableStateOf<Cartao?>(null)
+                }
 
-                // Também buscamos o cartão diretamente do banco pelo id.
                 LaunchedEffect(id) {
                     cartaoDetalhe = withContext(Dispatchers.IO) {
                         try {
                             cartaoDao.buscarPorId(id)
                         } catch (e: Exception) {
-                            Log.e(TAG_BANCO, "Erro ao buscar cartão por id", e)
+                            Log.e(
+                                TAG_BANCO,
+                                "Erro ao buscar cartão por id",
+                                e
+                            )
                             null
                         }
                     }
@@ -291,19 +363,30 @@ fun AppNavigation() {
 
                 TelaDetalheCartao(
                     cartao = cartaoDetalhe,
-                    onBack = { navController.popBackStack() },
+                    onBack = {
+                        navController.popBackStack()
+                    },
                     onAtualizar = { atualizado ->
                         CoroutineScope(Dispatchers.IO).launch {
                             try {
                                 cartaoDao.atualizar(atualizado)
-                                val recarregado = cartaoDao.buscarPorId(id)
-                                val listaAtualizada = cartaoDao.buscarTodos()
+
+                                val recarregado =
+                                    cartaoDao.buscarPorId(id)
+
+                                val listaAtualizada =
+                                    cartaoDao.buscarTodos()
+
                                 withContext(Dispatchers.Main) {
                                     cartaoDetalhe = recarregado
                                     cartoes = listaAtualizada
                                 }
                             } catch (e: Exception) {
-                                Log.e(TAG_BANCO, "Erro ao atualizar cartão", e)
+                                Log.e(
+                                    TAG_BANCO,
+                                    "Erro ao atualizar cartão",
+                                    e
+                                )
                             }
                         }
                     }
@@ -319,11 +402,31 @@ private fun BarraNavegacaoInferior(
     rotaAtual: String?
 ) {
     val itens = listOf(
-        ItemNavegacao(Rotas.HOME, "Home", Icons.Default.Home),
-        ItemNavegacao(Rotas.FATURA, "Fatura", Icons.Default.ReceiptLong),
-        ItemNavegacao(Rotas.TRANSACOES, "Movimentos", Icons.Default.SwapHoriz),
-        ItemNavegacao(Rotas.CARTOES, "Cartões", Icons.Default.CreditCard),
-        ItemNavegacao(Rotas.PIX, "Pix", Icons.Default.Pix)
+        ItemNavegacao(
+            Rotas.HOME,
+            "Home",
+            Icons.Default.Home
+        ),
+        ItemNavegacao(
+            Rotas.FATURA,
+            "Fatura",
+            Icons.Default.ReceiptLong
+        ),
+        ItemNavegacao(
+            Rotas.TRANSACOES,
+            "Movimentos",
+            Icons.Default.SwapHoriz
+        ),
+        ItemNavegacao(
+            Rotas.CARTOES,
+            "Cartões",
+            Icons.Default.CreditCard
+        ),
+        ItemNavegacao(
+            Rotas.PIX,
+            "Pix",
+            Icons.Default.Pix
+        )
     )
 
     NavigationBar {
@@ -332,9 +435,14 @@ private fun BarraNavegacaoInferior(
                 selected = rotaAtual == item.rota,
                 onClick = {
                     navController.navigate(item.rota) {
-                        popUpTo(navController.graph.findStartDestination().id) {
+                        popUpTo(
+                            navController.graph
+                                .findStartDestination()
+                                .id
+                        ) {
                             saveState = true
                         }
+
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -345,7 +453,9 @@ private fun BarraNavegacaoInferior(
                         contentDescription = item.titulo
                     )
                 },
-                label = { Text(item.titulo) }
+                label = {
+                    Text(item.titulo)
+                }
             )
         }
     }
