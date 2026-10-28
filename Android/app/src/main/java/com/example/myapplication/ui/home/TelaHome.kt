@@ -35,6 +35,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.myapplication.navigation.Rotas
+import com.example.myapplication.ui.trazerdinheiro.PopUpTrazerDinheiro
 
 private val PinkPrimary = Color(0xFFE6007E)
 private val PinkLight = Color(0xFFF7DCE1)
@@ -54,6 +60,25 @@ private val BackgroundGray = Color(0xFFF2F2F2)
 fun TelaHome(
     navController: NavHostController
 ) {
+    var saldo by remember {
+        mutableDoubleStateOf(67.67)
+    }
+
+    var mostrarPopUpTrazerDinheiro by remember {
+        mutableStateOf(false)
+    }
+
+    if (mostrarPopUpTrazerDinheiro) {
+        PopUpTrazerDinheiro(
+            onDismiss = {
+                mostrarPopUpTrazerDinheiro = false
+            },
+            onConfirmar = { valorAdicionado ->
+                saldo += valorAdicionado
+            }
+        )
+    }
+
     Scaffold(
         containerColor = BackgroundGray,
         topBar = {
@@ -69,7 +94,9 @@ fun TelaHome(
                 modifier = Modifier.height(32.dp)
             )
 
-            SaldoConta()
+            SaldoConta(
+                saldo = saldo
+            )
 
             Spacer(
                 modifier = Modifier.height(34.dp)
@@ -80,7 +107,7 @@ fun TelaHome(
                     navController.navigate(Rotas.PIX)
                 },
                 onTrazerDinheiro = {
-                    navController.navigate(Rotas.PIX)
+                    mostrarPopUpTrazerDinheiro = true
                 },
                 onPagar = {
                     navController.navigate(Rotas.FATURA)
@@ -178,7 +205,11 @@ private fun CabecalhoRosa() {
 }
 
 @Composable
-private fun SaldoConta() {
+private fun SaldoConta(
+    saldo: Double
+) {
+    val saldoFormatado = "R$ %.2f".format(saldo).replace('.', ',')
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,7 +231,7 @@ private fun SaldoConta() {
             )
 
             Text(
-                text = "R$67,67",
+                text = saldoFormatado,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )

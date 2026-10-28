@@ -135,6 +135,16 @@ fun AppNavigation() {
                 )
             }
 
+            composable(Rotas.TRAZER_DINHEIRO) {
+                com.example.myapplication.ui.trazerdinheiro.TelaTrazerDinheiro(
+                    onBack = {
+                        voltarParaAnteriorOuHome(
+                            navController
+                        )
+                    }
+                )
+            }
+
             composable(
                 route = "${Rotas.DETALHE_TRANSACAO}/{id}",
                 arguments = listOf(

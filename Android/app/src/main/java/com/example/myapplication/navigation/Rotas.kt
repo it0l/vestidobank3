@@ -6,6 +6,7 @@ object Rotas {
     const val TRANSACOES = "transacoes"
     const val CARTOES = "cartoes"
     const val PIX = "pix"
+    const val TRAZER_DINHEIRO = "trazer_dinheiro"
     const val DETALHE_TRANSACAO = "detalhe_transacao"
     const val DETALHE_CARTAO = "detalhe_cartao"
 
