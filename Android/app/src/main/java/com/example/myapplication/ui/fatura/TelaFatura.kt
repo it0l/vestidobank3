@@ -239,40 +239,6 @@ fun TelaFatura(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(22.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = SoftPink
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(18.dp)
-                    ) {
-                        Text(
-                            "Atualização automática",
-                            color = TextColor,
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(
-                            modifier = Modifier.height(5.dp)
-                        )
-
-                        Text(
-                            "As movimentações salvas no Room aparecem aqui automaticamente.",
-                            color = SecondaryText,
-                            fontSize = 14.sp,
-                            lineHeight = 19.sp
-                        )
-                    }
-                }
-
-                Spacer(
-                    modifier = Modifier.height(18.dp)
-                )
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(
                         containerColor = CardWhite
                     )
                 ) {
