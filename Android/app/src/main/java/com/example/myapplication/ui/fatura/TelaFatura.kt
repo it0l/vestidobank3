@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.local.AppDatabase
 import com.example.myapplication.data.local.Transacao
+import com.example.myapplication.data.repository.ContaRepository
 import com.example.myapplication.data.repository.TransacaoRepository
 
 private val Background = Color(0xFFF5F5F7)
@@ -68,6 +69,9 @@ fun TelaFatura(
         factory = FaturaViewModelFactory(
             TransacaoRepository(
                 AppDatabase.getDatabase(LocalContext.current).transacaoDao()
+            ),
+            ContaRepository.getInstance(
+                LocalContext.current
             )
         )
     )
@@ -325,6 +329,18 @@ fun TelaFatura(
                     )
 
                     Spacer(
+                        modifier = Modifier.height(4.dp)
+                    )
+
+                    Text(
+                        "Saldo em conta: R$ %.2f".format(
+                            uiState.saldoConta
+                        ),
+                        fontSize = 13.sp,
+                        color = SecondaryText
+                    )
+
+                    Spacer(
                         modifier = Modifier.height(12.dp)
                     )
 
@@ -346,14 +362,17 @@ fun TelaFatura(
             confirmButton = {
                 Button(
                     onClick = {
+                        val (sucesso, mensagem) = viewModel.pagarFatura(valorPagamento)
                         Toast.makeText(
                             context,
-                            "Pagamento confirmado",
+                            mensagem,
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        mostrarPagamento = false
-                        valorPagamento = ""
+                        if (sucesso) {
+                            mostrarPagamento = false
+                            valorPagamento = ""
+                        }
                     }
                 ) {
                     Text("Confirmar")

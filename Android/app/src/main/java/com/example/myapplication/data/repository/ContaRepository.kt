@@ -1,26 +1,20 @@
 package com.example.myapplication.data.repository
 
 import android.content.Context
-import com.example.myapplication.data.local.Transacao
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class ContaRepository(
-    context: Context,
-    private val transacaoRepository: TransacaoRepository
+    context: Context
 ) {
     private val prefs = context.getSharedPreferences("vestidobank_prefs", Context.MODE_PRIVATE)
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     private val _saldoFlow = MutableStateFlow(carregarSaldo())
     val saldoFlow: StateFlow<Double> = _saldoFlow.asStateFlow()
+
+    private val _totalPagoFaturaFlow = MutableStateFlow(carregarTotalPagoFatura())
+    val totalPagoFaturaFlow: StateFlow<Double> = _totalPagoFaturaFlow.asStateFlow()
 
     private fun carregarSaldo(): Double {
         val saldoSalvo = prefs.getFloat(KEY_SALDO, -1f)
@@ -36,22 +30,25 @@ class ContaRepository(
         _saldoFlow.value = novoSaldo
     }
 
+    private fun carregarTotalPagoFatura(): Double {
+        return prefs.getFloat(KEY_TOTAL_PAGO_FATURA, 0f).toDouble()
+    }
+
+    private fun salvarTotalPagoFatura(novoTotal: Double) {
+        prefs.edit().putFloat(KEY_TOTAL_PAGO_FATURA, novoTotal.toFloat()).apply()
+        _totalPagoFaturaFlow.value = novoTotal
+    }
+
+    fun atualizarTotalPagoFatura(novoTotal: Double) {
+        val totalValido = novoTotal.coerceAtLeast(0.0)
+        salvarTotalPagoFatura(totalValido)
+    }
+
     fun adicionarSaldo(valor: Double) {
         if (valor <= 0) return
         val saldoAtual = _saldoFlow.value
         val novoSaldo = saldoAtual + valor
         salvarSaldo(novoSaldo)
-
-        scope.launch {
-            transacaoRepository.inserir(
-                Transacao(
-                    descricao = "Depósito em conta",
-                    valor = valor,
-                    categoria = "Depósito",
-                    data = dataAtualFormatada()
-                )
-            )
-        }
     }
 
     fun realizarPix(chave: String, valor: Double): Boolean {
@@ -62,28 +59,27 @@ class ContaRepository(
 
         val novoSaldo = saldoAtual - valor
         salvarSaldo(novoSaldo)
+        return true
+    }
 
-        scope.launch {
-            transacaoRepository.inserir(
-                Transacao(
-                    descricao = "Pix para $chave",
-                    valor = valor,
-                    categoria = "Pix",
-                    data = dataAtualFormatada()
-                )
-            )
+    fun pagarFatura(valor: Double): Boolean {
+        val saldoAtual = _saldoFlow.value
+        if (valor <= 0 || valor > saldoAtual) {
+            return false
         }
+
+        val novoSaldo = saldoAtual - valor
+        salvarSaldo(novoSaldo)
+
+        val novoTotalPago = _totalPagoFaturaFlow.value + valor
+        salvarTotalPagoFatura(novoTotalPago)
 
         return true
     }
 
-    private fun dataAtualFormatada(): String {
-        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        return formatter.format(Date())
-    }
-
     companion object {
         private const val KEY_SALDO = "saldo_conta"
+        private const val KEY_TOTAL_PAGO_FATURA = "total_pago_fatura"
         private const val SALDO_INICIAL = 67.67
 
         @Volatile
@@ -91,12 +87,11 @@ class ContaRepository(
 
         fun getInstance(
             context: Context,
-            transacaoRepository: TransacaoRepository
+            transacaoRepository: TransacaoRepository? = null
         ): ContaRepository {
             return INSTANCE ?: synchronized(this) {
                 val instance = ContaRepository(
-                    context.applicationContext,
-                    transacaoRepository
+                    context.applicationContext
                 )
                 INSTANCE = instance
                 instance

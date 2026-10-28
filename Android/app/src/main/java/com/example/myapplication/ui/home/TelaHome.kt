@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +37,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -74,10 +78,54 @@ fun TelaHome(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    var mostrarPopUpInvestimentos by remember {
+        mutableStateOf(false)
+    }
+
     if (uiState.mostrarPopUpTrazerDinheiro) {
         PopUpTrazerDinheiro(
             onDismiss = viewModel::onFecharPopUpTrazerDinheiro,
             onConfirmar = viewModel::onConfirmarTrazerDinheiro
+        )
+    }
+
+    if (mostrarPopUpInvestimentos) {
+        AlertDialog(
+            onDismissRequest = {
+                mostrarPopUpInvestimentos = false
+            },
+            title = {
+                Text(
+                    text = "Investimentos",
+                    fontWeight = FontWeight.Bold,
+                    color = PinkPrimary
+                )
+            },
+            text = {
+                Text(
+                    text = "o lula ganhou, não invista nesse pais e fuja pras colinas",
+                    fontSize = 15.sp,
+                    color = Color.DarkGray
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarPopUpInvestimentos = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = PinkPrimary,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(
+                        "Fechar",
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
         )
     }
 
@@ -121,7 +169,11 @@ fun TelaHome(
                 modifier = Modifier.height(34.dp)
             )
 
-            BannerInvestimentos()
+            BannerInvestimentos(
+                onClick = {
+                    mostrarPopUpInvestimentos = true
+                }
+            )
 
             Spacer(
                 modifier = Modifier.height(20.dp)
@@ -327,12 +379,17 @@ private fun AcaoCircular(
 }
 
 @Composable
-private fun BannerInvestimentos() {
+private fun BannerInvestimentos(
+    onClick: () -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
                 horizontal = 16.dp
+            )
+            .clickable(
+                onClick = onClick
             ),
         shape = RoundedCornerShape(16.dp),
         color = PinkPrimary
