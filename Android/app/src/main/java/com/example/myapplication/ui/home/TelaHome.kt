@@ -36,19 +36,21 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.myapplication.data.local.AppDatabase
+import com.example.myapplication.data.repository.ContaRepository
+import com.example.myapplication.data.repository.TransacaoRepository
 import com.example.myapplication.navigation.Rotas
 import com.example.myapplication.ui.trazerdinheiro.PopUpTrazerDinheiro
 
@@ -58,24 +60,24 @@ private val BackgroundGray = Color(0xFFF2F2F2)
 
 @Composable
 fun TelaHome(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: HomeViewModel = viewModel(
+        factory = HomeViewModelFactory(
+            ContaRepository.getInstance(
+                LocalContext.current,
+                TransacaoRepository(
+                    AppDatabase.getDatabase(LocalContext.current).transacaoDao()
+                )
+            )
+        )
+    )
 ) {
-    var saldo by remember {
-        mutableDoubleStateOf(67.67)
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var mostrarPopUpTrazerDinheiro by remember {
-        mutableStateOf(false)
-    }
-
-    if (mostrarPopUpTrazerDinheiro) {
+    if (uiState.mostrarPopUpTrazerDinheiro) {
         PopUpTrazerDinheiro(
-            onDismiss = {
-                mostrarPopUpTrazerDinheiro = false
-            },
-            onConfirmar = { valorAdicionado ->
-                saldo += valorAdicionado
-            }
+            onDismiss = viewModel::onFecharPopUpTrazerDinheiro,
+            onConfirmar = viewModel::onConfirmarTrazerDinheiro
         )
     }
 
@@ -95,7 +97,7 @@ fun TelaHome(
             )
 
             SaldoConta(
-                saldo = saldo
+                saldo = uiState.saldo
             )
 
             Spacer(
@@ -106,9 +108,7 @@ fun TelaHome(
                 onPix = {
                     navController.navigate(Rotas.PIX)
                 },
-                onTrazerDinheiro = {
-                    mostrarPopUpTrazerDinheiro = true
-                },
+                onTrazerDinheiro = viewModel::onAbrirPopUpTrazerDinheiro,
                 onPagar = {
                     navController.navigate(Rotas.FATURA)
                 },

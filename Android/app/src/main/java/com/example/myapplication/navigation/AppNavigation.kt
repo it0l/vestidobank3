@@ -136,11 +136,22 @@ fun AppNavigation() {
             }
 
             composable(Rotas.TRAZER_DINHEIRO) {
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val contaRepository = com.example.myapplication.data.repository.ContaRepository.getInstance(
+                    context,
+                    com.example.myapplication.data.repository.TransacaoRepository(
+                        com.example.myapplication.data.local.AppDatabase.getDatabase(context).transacaoDao()
+                    )
+                )
+
                 com.example.myapplication.ui.trazerdinheiro.TelaTrazerDinheiro(
                     onBack = {
                         voltarParaAnteriorOuHome(
                             navController
                         )
+                    },
+                    onAdicionarSaldo = { valor ->
+                        contaRepository.adicionarSaldo(valor)
                     }
                 )
             }

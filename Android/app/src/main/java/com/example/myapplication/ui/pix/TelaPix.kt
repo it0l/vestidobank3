@@ -20,14 +20,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.myapplication.data.local.AppDatabase
+import com.example.myapplication.data.repository.ContaRepository
+import com.example.myapplication.data.repository.TransacaoRepository
 
 private val VestidoPink = Color(0xFFE6007E)
 private val Fundo = Color(0xFFF2F2F2)
@@ -36,23 +39,20 @@ private val TextoEscuro = Color(0xFF202020)
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun TelaPix(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: PixViewModel = viewModel(
+        factory = PixViewModelFactory(
+            ContaRepository.getInstance(
+                LocalContext.current,
+                TransacaoRepository(
+                    AppDatabase.getDatabase(LocalContext.current).transacaoDao()
+                )
+            )
+        )
+    )
 ) {
-    var chave by remember {
-        mutableStateOf("")
-    }
-
-    var valor by remember {
-        mutableStateOf("")
-    }
-
-    var mensagem by remember {
-        mutableStateOf("")
-    }
-
-    var sucesso by remember {
-        mutableStateOf(false)
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val saldoFormatado = "R$ %.2f".format(uiState.saldoAtual).replace('.', ',')
 
     Scaffold(
         containerColor = Fundo,
@@ -106,14 +106,23 @@ fun TelaPix(
             )
 
             Spacer(
+                modifier = Modifier.height(4.dp)
+            )
+
+            Text(
+                text = "Saldo disponível: $saldoFormatado",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = VestidoPink
+            )
+
+            Spacer(
                 modifier = Modifier.height(24.dp)
             )
 
             OutlinedTextField(
-                value = chave,
-                onValueChange = {
-                    chave = it
-                },
+                value = uiState.chave,
+                onValueChange = viewModel::onChaveChange,
                 modifier = Modifier.fillMaxWidth(),
                 label = {
                     Text("Chave Pix")
@@ -131,10 +140,8 @@ fun TelaPix(
             )
 
             OutlinedTextField(
-                value = valor,
-                onValueChange = {
-                    valor = it
-                },
+                value = uiState.valor,
+                onValueChange = viewModel::onValorChange,
                 modifier = Modifier.fillMaxWidth(),
                 label = {
                     Text("Valor")
@@ -155,29 +162,7 @@ fun TelaPix(
             )
 
             Button(
-                onClick = {
-                    val valorNumerico = valor
-                        .replace(",", ".")
-                        .toDoubleOrNull()
-
-                    if (
-                        chave.isNotBlank() &&
-                        valorNumerico != null &&
-                        valorNumerico > 0
-                    ) {
-                        mensagem = "Pix de R$ %.2f preparado para %s".format(
-                            valorNumerico,
-                            chave
-                        )
-
-                        sucesso = true
-                        chave = ""
-                        valor = ""
-                    } else {
-                        mensagem = "Informe uma chave e um valor válido."
-                        sucesso = false
-                    }
-                },
+                onClick = viewModel::onEnviarPix,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = VestidoPink,
@@ -190,14 +175,14 @@ fun TelaPix(
                 )
             }
 
-            if (mensagem.isNotBlank()) {
+            if (uiState.mensagem.isNotBlank()) {
                 Spacer(
                     modifier = Modifier.height(20.dp)
                 )
 
                 Text(
-                    text = mensagem,
-                    color = if (sucesso) {
+                    text = uiState.mensagem,
+                    color = if (uiState.sucesso) {
                         VestidoPink
                     } else {
                         Color(0xFFB00020)
